@@ -11,6 +11,7 @@
 #include "parameters.h"
 #include "millis.h"
 #include "bmg250_wrapper.h"
+#include "lis2dw12_wrapper.h"
 #include "fram.h"
 #include "app_timer.h"
 #include "Model.h"
@@ -35,6 +36,8 @@ static void _i2c_scheduling_sensors_init() {
 
 	// TODO Init sensors configuration
 	bmg250_wrapper_init();
+
+	lis2dw12_wrapper_init();
 
 	// post-init steps
 	_i2c_scheduling_sensors_post_init();
