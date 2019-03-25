@@ -17,12 +17,6 @@
 
 
 
-#ifndef _DEBUG_TWI
-
-#define I2C_SCHEDULING_PERIOD_MS      (BARO_REFRESH_PER_MS)
-
-static uint32_t m_last_polled_index = 0;
-
 APP_TIMER_DEF(m_timer);
 
 
@@ -60,8 +54,6 @@ static void timer_handler(void * p_context)
     W_SYSVIEW_RecordExitISR();
 }
 
-#endif
-
 /**
  *
  */
@@ -75,8 +67,8 @@ void i2c_scheduling_init(void) {
 	err_code = app_timer_create(&m_timer, APP_TIMER_MODE_REPEATED, timer_handler);
 	APP_ERROR_CHECK(err_code);
 
-	err_code = app_timer_start(m_timer, APP_TIMER_TICKS(I2C_SCHEDULING_PERIOD_MS), NULL);
-	APP_ERROR_CHECK(err_code);
+//	err_code = app_timer_start(m_timer, APP_TIMER_TICKS(I2C_SCHEDULING_PERIOD_MS), NULL);
+//	APP_ERROR_CHECK(err_code);
 
 }
 

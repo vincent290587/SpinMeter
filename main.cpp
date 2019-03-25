@@ -12,6 +12,7 @@
 #include "hardfault.h"
 #include "i2c.h"
 #include "helper.h"
+#include "ant.h"
 #include "bsp.h"
 #include "i2c.h"
 #include "fram.h"
@@ -355,7 +356,8 @@ int main(void)
 
 	nrf_delay_ms(1000);
 
-	nrf_pwr_mgmt_init();
+	err_code = nrf_pwr_mgmt_init();
+	APP_ERROR_CHECK(err_code);
 
 #if APP_SCHEDULER_ENABLED
 	APP_SCHED_INIT(SCHED_MAX_EVENT_DATA_SIZE, SCHED_QUEUE_SIZE);
@@ -367,12 +369,15 @@ int main(void)
 #ifdef SOFTDEVICE_PRESENT
 	sdh_init();
 #endif
-#ifdef FDS_PRESENT
-	fram_init_sensor();
-	u_settings.checkConfigVersion();
+#if defined (ANT_STACK_SUPPORT_REQD)
+	ant_stack_init();
 #endif
 #if defined (BLE_STACK_SUPPORT_REQD)
 	ble_init();
+#endif
+#ifdef FDS_PRESENT
+	fram_init_sensor();
+	u_settings.checkConfigVersion();
 #endif
 
 	// init all I2C devices
