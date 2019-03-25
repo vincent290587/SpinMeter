@@ -6,15 +6,14 @@
  */
 
 #include "i2c.h"
-#include <i2c_scheduler.h>
+#include "i2c_scheduler.h"
 #include "segger_wrapper.h"
 #include "parameters.h"
 #include "millis.h"
-#include "millis.h"
+#include "bmg250_wrapper.h"
 #include "fram.h"
 #include "app_timer.h"
 #include "Model.h"
-
 
 
 APP_TIMER_DEF(m_timer);
@@ -35,7 +34,7 @@ static void _i2c_scheduling_sensors_post_init(void) {
 static void _i2c_scheduling_sensors_init() {
 
 	// TODO Init sensors configuration
-
+	bmg250_wrapper_init();
 
 	// post-init steps
 	_i2c_scheduling_sensors_post_init();
@@ -74,8 +73,8 @@ void i2c_scheduling_init(void) {
 
 void i2c_scheduling_tasks(void) {
 
+	if (bmg250_wrapper_is_updated()) {
+		bmg250_wrapper_sensor_refresh();
+	}
 
-
-	// dispatch to model
-	model_dispatch_sensors_update();
 }

@@ -279,6 +279,11 @@ static void buttons_leds_init(void)
 
 static void pins_init(void)
 {
+	ret_code_t err_code;
+
+	err_code = nrf_drv_gpiote_init();
+	APP_ERROR_CHECK(err_code);
+
 	// TODO configure pins
 
 }

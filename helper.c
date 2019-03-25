@@ -126,13 +126,6 @@ void pwr_mgmt_run(void) {
 
 }
 
-
-void delay(uint32_t p_time) {
-
-	nrf_delay_ms(p_time);
-
-}
-
 void pinMode(uint8_t p_pin, uint8_t p_mode) {
 
 	if (p_mode == OUTPUT) {

@@ -53,12 +53,6 @@ void pwr_mgmt_run(void);
  */
 void init_timers_millis();
 
-/**
- * Delay of X milliseconds. Blocking function
- * @param p_time Number of ms to wait for
- */
-void delay(uint32_t p_time);
-
 /** @brief configures a pin either as an input (see p_mode) or as an output (OUTPUT)
  *
  * @param p_pin Pin number.
