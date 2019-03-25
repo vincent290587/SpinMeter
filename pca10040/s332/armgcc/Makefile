@@ -13,6 +13,7 @@ $(OUTPUT_DIRECTORY)/nrf52832_xxaa.out: \
 # Source files common to all targets
 SRC_FILES += \
   $(PROJ_DIR)/rf/ant.c \
+  $(PROJ_DIR)/rf/bsc.c \
   $(SDK_ROOT)/modules/nrfx/mdk/gcc_startup_nrf52.S \
   $(SDK_ROOT)/modules/nrfx/mdk/system_nrf52.c \
   $(SDK_ROOT)/components/ant/ant_channel_config/ant_channel_config.c \
@@ -20,6 +21,7 @@ SRC_FILES += \
   $(SDK_ROOT)/components/ant/ant_state_indicator/ant_state_indicator.c \
   $(SDK_ROOT)/components/ant/ant_search_config/ant_search_config.c \
   $(SDK_ROOT)/components/ant/ant_profiles/ant_bsc/ant_bsc.c \
+  $(SDK_ROOT)/components/ant/ant_profiles/ant_bsc/simulator/ant_bsc_simulator.c \
   $(SDK_ROOT)/components/ant/ant_profiles/ant_bsc/pages/ant_bsc_combined_page_0.c \
   $(SDK_ROOT)/components/ant/ant_profiles/ant_bsc/pages/ant_bsc_page_0.c \
   $(SDK_ROOT)/components/ant/ant_profiles/ant_bsc/pages/ant_bsc_page_1.c \

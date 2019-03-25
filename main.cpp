@@ -371,6 +371,8 @@ int main(void)
 #endif
 #if defined (ANT_STACK_SUPPORT_REQD)
 	ant_stack_init();
+	ant_setup_init();
+	ant_setup_start();
 #endif
 #if defined (BLE_STACK_SUPPORT_REQD)
 	ble_init();

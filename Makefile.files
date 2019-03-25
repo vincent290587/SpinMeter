@@ -49,6 +49,7 @@ SRC_FILES += \
   $(SDK_ROOT)/components/libraries/block_dev/ram/nrf_block_dev_ram.c \
   $(SDK_ROOT)/components/libraries/memobj/nrf_memobj.c \
   $(SDK_ROOT)/components/libraries/mpu/nrf_mpu_lib.c \
+  $(SDK_ROOT)/components/libraries/sensorsim/sensorsim.c \
   $(SDK_ROOT)/components/libraries/pwr_mgmt/nrf_pwr_mgmt.c \
   $(SDK_ROOT)/components/libraries/queue/nrf_queue.c \
   $(SDK_ROOT)/components/libraries/ringbuf/nrf_ringbuf.c \
@@ -134,6 +135,7 @@ INC_FOLDERS += \
   $(SDK_ROOT)/components/boards \
   $(SDK_ROOT)/components/libraries/spi_mngr \
   $(SDK_ROOT)/components/libraries/twi_mngr \
+  $(SDK_ROOT)/components/libraries/sensorsim \
   $(SDK_ROOT)/components/libraries/memobj \
   $(SDK_ROOT)/components/libraries/mpu \
   $(SDK_ROOT)/integration/nrfx \
@@ -158,6 +160,7 @@ INC_FOLDERS += \
   $(SDK_ROOT)/components/ant/ant_profiles/ant_bsc/pages \
   $(SDK_ROOT)/components/ant/ant_profiles/ant_bsc \
   $(SDK_ROOT)/components/ant/ant_profiles/ant_bsc/utils \
+  $(SDK_ROOT)/components/ant/ant_profiles/ant_bsc/simulator \
   $(SDK_ROOT)/components/ble/ble_advertising \
   $(SDK_ROOT)/components/ble/ble_db_discovery \
   $(SDK_ROOT)/components/ble/ble_dtm \

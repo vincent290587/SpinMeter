@@ -8,8 +8,6 @@
 #define WILDCARD_TRANSMISSION_TYPE      0x00
 #define ANTPLUS_NETWORK_NUMBER          0x00      /**< Network number. */
 
-#define BSC_CHANNEL_NUMBER              0x00
-
 
 #ifdef __cplusplus
 extern "C" {
@@ -22,7 +20,7 @@ void ant_stack_init(void);
 
 void ant_setup_init(void);
 
-void ant_setup_start(uint16_t bsc_id);
+void ant_setup_start(void);
 
 void ant_timers_init(void);
 
