@@ -8,6 +8,7 @@
 
 #include <stdint.h>
 #include "i2c.h"
+#include "gpio.h"
 #include "boards.h"
 #include "helper.h"
 #include "lis2dw12_reg.h"
@@ -110,8 +111,16 @@ static void _lis2dw12_read_sensor(void) {
 
 static void _int1_handler(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action)
 {
+	// clear trigger
+	gpio_clear(LIS_INT2);
+
 	// schedule sensor reading
 	_lis2dw12_read_sensor();
+}
+
+void lis2dw12_meas_trigger(void) {
+	// set trigger
+	gpio_set(LIS_INT2);
 }
 
 void lis2dw12_wrapper_init(void)
@@ -152,26 +161,25 @@ void lis2dw12_wrapper_init(void)
 	 *
 	 * Accelerometer - filter path / bandwidth
 	 */
-	lis2dw12_filter_path_set(&dev_ctx, LIS2DW12_LPF_ON_OUT);
+//	lis2dw12_filter_path_set(&dev_ctx, LIS2DW12_LPF_ON_OUT);
 	lis2dw12_filter_bandwidth_set(&dev_ctx, LIS2DW12_ODR_DIV_4);
 
 	/*
 	 * Configure power mode
 	 */
-	//lis2dw12_power_mode_set(&dev_ctx, LIS2DW12_HIGH_PERFORMANCE);
-	lis2dw12_power_mode_set(&dev_ctx, LIS2DW12_CONT_LOW_PWR_LOW_NOISE_12bit);
+	lis2dw12_power_mode_set(&dev_ctx, LIS2DW12_SINGLE_LOW_PWR_LOW_NOISE_3);
 
 	/*
 	 * Set Output Data Rate
 	 */
-	lis2dw12_data_rate_set(&dev_ctx, LIS2DW12_XL_ODR_25Hz);
+	lis2dw12_data_rate_set(&dev_ctx, LIS2DW12_XL_SET_PIN_TRIG);
 
 	/*
-	 * Enable interrupt generation on Wake-Up INT1 pin
+	 * Enable interrupt generation on data ready INT1 pin
 	 *
 	 */
 	lis2dw12_pin_int1_route_get(&dev_ctx, &int_route.ctrl4_int1_pad_ctrl);
-	int_route.ctrl4_int1_pad_ctrl.int1_wu = PROPERTY_ENABLE;
+	int_route.ctrl4_int1_pad_ctrl.int1_drdy = PROPERTY_ENABLE;
 	lis2dw12_pin_int1_route_set(&dev_ctx, &int_route.ctrl4_int1_pad_ctrl);
 
 	nrfx_gpiote_in_config_t in_config = NRFX_GPIOTE_CONFIG_IN_SENSE_LOTOHI(true);
@@ -246,17 +254,20 @@ void lis2dw12_wrapper_set_wake(void)
 	 * Enable interrupt generation on Wake-Up INT2 pin
 	 *
 	 */
-	lis2dw12_pin_int2_route_get(&dev_ctx, &int_route.ctrl5_int2_pad_ctrl);
-	int_route.ctrl5_int2_pad_ctrl.int2_drdy = PROPERTY_ENABLE;
-	lis2dw12_pin_int2_route_set(&dev_ctx, &int_route.ctrl5_int2_pad_ctrl);
+	lis2dw12_pin_int1_route_get(&dev_ctx, &int_route.ctrl4_int1_pad_ctrl);
+	int_route.ctrl4_int1_pad_ctrl.int1_wu = PROPERTY_ENABLE;
+	lis2dw12_pin_int1_route_set(&dev_ctx, &int_route.ctrl4_int1_pad_ctrl);
 
-	nrfx_gpiote_in_config_t in_config = NRFX_GPIOTE_CONFIG_IN_SENSE_LOTOHI(true);
-	in_config.pull = NRF_GPIO_PIN_PULLDOWN;
+}
 
-	ret_code_t err_code = nrfx_gpiote_in_init(LIS_INT2, &in_config, _int1_handler);
-	APP_ERROR_CHECK(err_code);
+bool lis2dw12_wrapper_is_updated(void) {
+	return m_is_updated;
+}
 
-	nrfx_gpiote_in_event_enable(LIS_INT2, true);
+void lis2dw12_wrapper_sensor_refresh(void) {
+
+	if (!m_is_updated) return;
+	m_is_updated = false;
 
 }
 

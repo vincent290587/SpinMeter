@@ -203,5 +203,4 @@ void bmg250_wrapper_sensor_refresh(void) {
 	if (!m_is_updated) return;
 	m_is_updated = false;
 
-
 }

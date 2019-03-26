@@ -27,6 +27,7 @@ include_directories(
 	TDD/sensors
 	TDD/scheduler
 	libraries/utils
+    libraries/kalman
     libraries/filters
 	rf
     source
@@ -47,7 +48,8 @@ set(SRCS
 	timer/timer.c
 	drivers/ant_tdd.c
 	drivers/gpio_tdd.cpp
-	libraries/utils/WString.cpp
+	libraries/kalman/kalman_ext.c
+    libraries/utils/WString.cpp
 	libraries/utils/utils.c
     source/sensors/fram.c
 	source/model/PowerZone.cpp

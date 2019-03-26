@@ -17,9 +17,6 @@
 #include "Model.h"
 
 
-APP_TIMER_DEF(m_timer);
-
-
 /**
  *
  */
@@ -45,39 +42,23 @@ static void _i2c_scheduling_sensors_init() {
 
 /**
  *
- * @param p_context
- */
-static void timer_handler(void * p_context)
-{
-	W_SYSVIEW_RecordEnterISR();
-
-	// TODO
-
-    W_SYSVIEW_RecordExitISR();
-}
-
-/**
- *
  */
 void i2c_scheduling_init(void) {
 
 	_i2c_scheduling_sensors_init();
-
-	delay_ms(3);
-
-	ret_code_t err_code;
-	err_code = app_timer_create(&m_timer, APP_TIMER_MODE_REPEATED, timer_handler);
-	APP_ERROR_CHECK(err_code);
-
-//	err_code = app_timer_start(m_timer, APP_TIMER_TICKS(I2C_SCHEDULING_PERIOD_MS), NULL);
-//	APP_ERROR_CHECK(err_code);
 
 }
 
 void i2c_scheduling_tasks(void) {
 
 	if (bmg250_wrapper_is_updated()) {
+		// trigger a measurement in the lis2dw
+		lis2dw12_meas_trigger();
 		bmg250_wrapper_sensor_refresh();
+	}
+	if (lis2dw12_wrapper_is_updated()) {
+		lis2dw12_wrapper_sensor_refresh();
+		// TODO trigger kalman
 	}
 
 }

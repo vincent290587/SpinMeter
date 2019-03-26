@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include "Model_tdd.h"
+#include "kalman_ext.h"
 #include "fram.h"
 #include "utils.h"
 
@@ -18,6 +19,46 @@
 #define TEST_FILTRE_NB    15
 
 #define TEST_ROLLOF_NB    48759
+
+bool test_kalman_ext(void) {
+
+	LOG_INFO("Testing Kalman...");
+
+	sKalmanExtDescr descr;
+	sKalmanExtFeed feed;
+
+	kalman_ext_init(&descr);
+
+	feed.dt_ms = 10;
+
+	float angle = 0.0F;
+	float angle_p = 0.1 *1000 / feed.dt_ms;
+
+	for (int i= 1; i< 200; i++) {
+
+		angle += angle_p * feed.dt_ms;
+		feed.gyr = angle_p * 1.05;
+
+		feed.acc[0] = angle_p * angle_p * 0.15 + 9.81 * cosf(angle);
+		feed.acc[1] = 9.81 * sinf(angle);
+
+		kalman_ext_feed(&descr, &feed);
+
+		LOG_INFO("Estimated rot.: %f %f %f %f",
+				descr.ker.theta,
+				descr.ker.theta_p,
+				descr.ker.theta_p_offset,
+				descr.ker.dx);
+
+	}
+
+
+	LOG_INFO("Kalman OK");
+
+	exit(0);
+
+	return true;
+}
 
 bool test_fram(void) {
 

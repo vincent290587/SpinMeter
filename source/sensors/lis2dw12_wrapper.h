@@ -15,6 +15,8 @@ extern "C" {
 #endif
 
 
+void lis2dw12_meas_trigger(void);
+
 void lis2dw12_wrapper_init(void);
 
 bool lis2dw12_wrapper_is_updated(void);

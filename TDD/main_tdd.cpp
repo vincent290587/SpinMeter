@@ -142,6 +142,10 @@ int main(void)
 
 	LOG_INFO("Unit testing...");
 
+	if (!test_kalman_ext()) {
+		exit(__LINE__);
+	}
+
 	if (!test_fram()) {
 		exit(__LINE__);
 	}

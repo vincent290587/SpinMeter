@@ -24,6 +24,6 @@ void ant_setup_init(void) {
 
 }
 
-void ant_setup_start(uint16_t bsc_id) {
+void ant_setup_start(void) {
 	LOG_INFO("ANT started");
 }

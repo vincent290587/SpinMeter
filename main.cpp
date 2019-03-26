@@ -286,6 +286,11 @@ static void pins_init(void)
 
 	// TODO configure pins
 
+	nrf_gpio_cfg_input(GYR_INT1, NRF_GPIO_PIN_NOPULL);
+
+	nrf_gpio_pin_clear(LIS_INT2);
+	nrf_gpio_cfg_output(LIS_INT2);
+
 }
 
 void wdt_reload() {
