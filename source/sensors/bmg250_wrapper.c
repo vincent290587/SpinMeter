@@ -161,7 +161,7 @@ void bmg250_wrapper_init(void) {
 		/* Selecting the ODR as 100Hz */
 		gyro_cfg.odr = BMG250_ODR_100HZ;
 		/* Selecting the bw as Normal mode */
-		gyro_cfg.bw = BMG250_BW_NORMAL_MODE;
+		gyro_cfg.bw = BMG250_BW_OSR2_MODE;
 		/* Selecting the range as 2000 Degrees/second */
 		gyro_cfg.range = BMG250_RANGE_2000_DPS;
 	} else {
