@@ -11,6 +11,7 @@
 #include <stdbool.h>
 #include "Model_tdd.h"
 #include "kalman_ext.h"
+#include "sine_fitter.h"
 #include "fram.h"
 #include "utils.h"
 
@@ -24,30 +25,34 @@ bool test_kalman_ext(void) {
 
 	LOG_INFO("Testing Kalman...");
 
-	sKalmanExtDescr descr;
-	sKalmanExtFeed feed;
+	LOG_INFO("Kalman OK");
 
-	kalman_ext_init(&descr);
+	return true;
+}
 
-	feed.dt_ms = 10;
+bool test_sine_fitting(void) {
 
-	float angle = 1.0F;
-	float angle_p = 0.1; // 0.1 rad / s
+	LOG_INFO("Testing sine fitting...");
 
-	for (int i= 1; i< 500; i++) {
+	uint16_t numOfData = 10;
+	float * dataz = new float[numOfData];
+	float omega = 2 * M_PI;
+	float sampling = 0.1;
 
-		angle += angle_p * feed.dt_ms / 1000;
-		feed.gyr = angle_p * 1.05;
-
-		feed.acc[0] = angle_p * angle_p * 0.2 + 9.81 * cosf(angle);
-		feed.acc[1] = 9.81 * sinf(angle);
-
-		kalman_ext_feed(&descr, &feed);
-
+	for(int i=0;i < numOfData;i++)
+	{
+	  dataz[i] = 125 + 7 * sin(omega * sampling * i + 0.2);
 	}
 
+	sSineFitterOuput output;
+	sine_fitter_compute(dataz, omega, sampling, numOfData, &output);
 
-	LOG_INFO("Kalman OK");
+	LOG_INFO("Res.: %f %f %f",
+			output.alpha,
+			output.beta,
+			output.phi);
+
+	LOG_INFO("Fitting OK");
 
 	exit(0);
 
