@@ -13,12 +13,18 @@
 
 #include "kalman_ext.h"
 #include "math_wrapper.h"
+#include "nordic_common.h"
 #include "segger_wrapper.h"
 
 static void _time_update(sKalmanExtDescr *descr, sKalmanExtFeed *feed) {
 
-	descr->ker.theta = descr->ker.theta_p * feed->dt_ms / 1000.;
+	float c_theta = - descr->ker.theta_p * descr->ker.s_theta * feed->dt_ms / 1000.;
+	descr->ker.s_theta += descr->ker.theta_p * descr->ker.c_theta * feed->dt_ms / 1000.;
+	descr->ker.c_theta += c_theta;
 
+	float norm = descr->ker.c_theta*descr->ker.c_theta + descr->ker.s_theta*descr->ker.s_theta;
+	descr->ker.s_theta /= my_sqrtf(norm);
+	descr->ker.c_theta /= my_sqrtf(norm);
 }
 
 void kalman_ext_init(sKalmanExtDescr *descr) {
@@ -33,8 +39,13 @@ void kalman_ext_feed(sKalmanExtDescr *descr, sKalmanExtFeed *feed) {
 	ASSERT(descr);
 	ASSERT(feed);
 
+	// limit accelerometer vector
+	feed->acc[1] = MIN(feed->acc[1], 9.81);
+	feed->acc[1] = MAX(feed->acc[1], -9.81);
+
 	if (!descr->is_init) {
-		descr->ker.theta = 0.0;
+		descr->ker.s_theta = feed->acc[1] / 9.81;
+		descr->ker.c_theta = my_sqrtf(1 - descr->ker.s_theta*descr->ker.s_theta);
 		descr->ker.theta_p = feed->gyr;
 		descr->ker.theta_p_offset = 0.0;
 		descr->ker.dx = 0.1;
@@ -51,7 +62,8 @@ void kalman_ext_feed(sKalmanExtDescr *descr, sKalmanExtFeed *feed) {
 
 	// step 2: compute innovation
 	// I = Z - H.X
-	descr->innov.theta = asinf(feed->acc[1] / 9.81);
+	descr->innov.s_theta = descr->ker.s_theta - feed->acc[1] / 9.81;
+	descr->innov.c_theta = descr->ker.c_theta - (feed->acc[0] - feed->gyr*feed->gyr*descr->innov.dx) / 9.81;
 
 	descr->innov.theta_p = feed->gyr;
 
@@ -64,9 +76,8 @@ void kalman_ext_feed(sKalmanExtDescr *descr, sKalmanExtFeed *feed) {
 
 	if (descr->innov.dx > 0.0F) {
 		descr->innov.theta_p_offset = feed->gyr;
-		descr->innov.theta_p_offset -= (feed->acc[0] + cosf(descr->innov.theta) * 9.81) / descr->innov.dx;
-	} else {
-		descr->innov.theta_p_offset = 0;
+		descr->innov.theta_p_offset += 1000 * atan2f(descr->ker.s_theta, descr->ker.c_theta) / feed->dt_ms;
+		descr->innov.theta_p_offset -= 1000 * atan2f(descr->innov.s_theta, descr->innov.c_theta) / feed->dt_ms;
 	}
 
 	// compute gain
@@ -74,11 +85,20 @@ void kalman_ext_feed(sKalmanExtDescr *descr, sKalmanExtFeed *feed) {
 
 	// compute estimates
 //	descr->ker.theta_p = descr->ker.theta_p - descr->ker.theta_p_offset + descr->cov.k_mat * descr->innov.theta_p;
-	descr->ker.theta = 0.9 * descr->ker.theta + 0.1 * descr->innov.theta;
+
+	descr->ker.c_theta = 0.9 * descr->ker.c_theta + 0.1 * descr->innov.c_theta;
+	descr->ker.s_theta = 0.9 * descr->ker.s_theta + 0.1 * descr->innov.s_theta;
 
 	descr->ker.theta_p = 0.9 * descr->ker.theta_p + 0.1 * descr->innov.theta_p;
 
 	descr->ker.dx = 0.95 * descr->ker.dx + 0.04 * descr->innov.dx;
 
 	descr->ker.theta_p_offset = 0.95 * descr->ker.theta_p_offset + 0.05 * descr->innov.theta_p_offset;
+
+	LOG_INFO("Estimated rot.: %f %f %f %f %f",
+			descr->ker.c_theta,
+			descr->ker.s_theta,
+			descr->ker.theta_p,
+			descr->ker.theta_p_offset,
+			descr->ker.dx);
 }

@@ -21,7 +21,8 @@ typedef struct {
 
 typedef struct {
 	float dx;
-	float theta;
+	float c_theta;
+	float s_theta;
 	float theta_p;
 	float theta_p_offset;
 } sKalmanExtKernel;

@@ -31,24 +31,18 @@ bool test_kalman_ext(void) {
 
 	feed.dt_ms = 10;
 
-	float angle = 0.0F;
-	float angle_p = 0.1 *1000 / feed.dt_ms;
+	float angle = 1.0F;
+	float angle_p = 0.1; // 0.1 rad / s
 
-	for (int i= 1; i< 200; i++) {
+	for (int i= 1; i< 500; i++) {
 
-		angle += angle_p * feed.dt_ms;
+		angle += angle_p * feed.dt_ms / 1000;
 		feed.gyr = angle_p * 1.05;
 
-		feed.acc[0] = angle_p * angle_p * 0.15 + 9.81 * cosf(angle);
+		feed.acc[0] = angle_p * angle_p * 0.2 + 9.81 * cosf(angle);
 		feed.acc[1] = 9.81 * sinf(angle);
 
 		kalman_ext_feed(&descr, &feed);
-
-		LOG_INFO("Estimated rot.: %f %f %f %f",
-				descr.ker.theta,
-				descr.ker.theta_p,
-				descr.ker.theta_p_offset,
-				descr.ker.dx);
 
 	}
 
