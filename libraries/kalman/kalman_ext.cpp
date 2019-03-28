@@ -41,10 +41,6 @@ void kalman_ext_feed(sKalmanExtDescr *descr, sKalmanExtFeed *feed) {
 	feed->acc[1] = MAX(feed->acc[1], -9.81);
 
 	if (!descr->is_init) {
-		descr->ker.s_theta = feed->acc[1] / 9.81;
-		descr->ker.c_theta = my_sqrtf(1 - descr->ker.s_theta*descr->ker.s_theta);
-		descr->ker.theta_p = feed->gyr;
-		descr->ker.theta_p_offset = 0.0;
 
 		// size matrixes
 		descr->ker.matA.resize(3, 3);
@@ -56,15 +52,24 @@ void kalman_ext_feed(sKalmanExtDescr *descr, sKalmanExtFeed *feed) {
 		descr->ker.matX.resize(3, 1);
 		descr->ker.matXmi.resize(3, 1);
 
+		// set K
+		descr->ker.matK.m_data[0][0] = feed->acc[1];
+		descr->ker.matK.m_data[1][0] = feed->gyr;
+
+		// set C
 		descr->ker.matC.resize(1, 3);
 		descr->ker.matC.m_data[0][0] = 1;
 		descr->ker.matC.m_data[0][1] = 0;
 		descr->ker.matC.m_data[0][2] = 1;
 
 		// TODO set Q
-		descr->ker.matQ.m_data[0][2] = 1;
-		descr->ker.matQ.m_data[1][1] = 0;
-		descr->ker.matQ.m_data[2][0] = 1;
+		descr->ker.matQ.unity(1 / 20.);
+		descr->ker.matQ.transpose();
+
+		// TODO set P
+		descr->ker.matP.ones(999999);
+
+		descr->ker.r = 0.1;
 
 		descr->is_init = 1;
 
@@ -73,7 +78,7 @@ void kalman_ext_feed(sKalmanExtDescr *descr, sKalmanExtFeed *feed) {
 	_time_update(descr, feed);
 
 	// Measurement update
-	UDMatrix matAt(3, 3);
+	UDMatrix matAt;
 	matAt = descr->ker.matA.transpose();
 
 	// project covariance
@@ -81,10 +86,14 @@ void kalman_ext_feed(sKalmanExtDescr *descr, sKalmanExtFeed *feed) {
 	descr->ker.matPmi = descr->ker.matPmi * matAt;
 	descr->ker.matPmi = descr->ker.matPmi + descr->ker.matQ;
 
+	descr->ker.matPmi.print();
+
 	// y - Cx_est
 	UDMatrix matI(1, 1);
 	matI = descr->ker.matC * descr->ker.matXmi;
-	float innov = matI.m_data[0][0] - feed->gyr;
+	float innov = matI.m_data[0][0] - feed->acc[1];
+
+	LOG_INFO("Innov: %f", innov);
 
 	// update kalman gain
 	UDMatrix matCt(3, 1);

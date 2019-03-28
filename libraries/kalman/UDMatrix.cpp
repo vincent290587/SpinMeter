@@ -9,20 +9,13 @@
 #include "assert_wrapper.h"
 #include "segger_wrapper.h"
 
-UD1D::UD1D(unsigned size): m_size(size) {
-}
 
-UDVector::UDVector(unsigned size) : UD1D(size) {
-}
 
-UDColumn::UDColumn(unsigned size) : UD1D(size) {
+UDMatrix::UDMatrix(void) : m_rowSize(0), m_colSize(0) {
+
 }
 
 UDMatrix::UDMatrix(UDMatrix &mat) : m_data(mat.m_data), m_rowSize(mat.m_rowSize), m_colSize(mat.m_colSize) {
-
-}
-
-UDMatrix::UDMatrix(void) : m_rowSize(0), m_colSize(0) {
 
 }
 
@@ -79,16 +72,17 @@ UDMatrix UDMatrix::operator -(UDMatrix& s_mat) {
 
 UDMatrix UDMatrix::operator *(UDMatrix& s_mat) {
 
-	LOG_INFO("%u %u", this->m_colSize, s_mat.m_rowSize);
 	ASSERT(this->m_colSize == s_mat.m_rowSize);
 
 	UDMatrix res(this->m_rowSize, s_mat.m_colSize);
 
 	for (unsigned i=0; i< this->m_rowSize; i++) {
 		for (unsigned j=0; j< s_mat.m_colSize; j++) {
+
+			res.m_data[i][j] = 0.0;
 			for (unsigned k=0; k< this->m_colSize; k++) {
 
-				res.m_data[i][j] = this->m_data[i][k] * s_mat.m_data[k][j];
+				res.m_data[i][j] += this->m_data[i][k] * s_mat.m_data[k][j];
 
 			}
 		}
@@ -117,7 +111,7 @@ void UDMatrix::div(float val) {
 	for (unsigned i=0; i< this->m_rowSize; i++) {
 		for (unsigned j=0; j< this->m_colSize; j++) {
 
-			this->m_data[i][j] = this->m_data[i][j] * val;
+			this->m_data[i][j] /= val;
 
 		}
 	}
@@ -129,7 +123,7 @@ void UDMatrix::mul(float val) {
 	for (unsigned i=0; i< this->m_rowSize; i++) {
 		for (unsigned j=0; j< this->m_colSize; j++) {
 
-			this->m_data[i][j] = this->m_data[i][j] * val;
+			this->m_data[i][j] *= val;
 
 		}
 	}
@@ -241,15 +235,21 @@ void UDMatrix::unity(float res) {
 
 }
 
-void UDMatrix::zeros(void) {
+void UDMatrix::ones(float val) {
 
 	for (unsigned i=0; i< this->m_rowSize; i++) {
 		for (unsigned j=0; j< this->m_colSize; j++) {
 
-			this->m_data[i][j] = 0;
+			this->m_data[i][j] = val;
 
 		}
 	}
+
+}
+
+void UDMatrix::zeros(void) {
+
+	this->ones(0.0F);
 
 }
 

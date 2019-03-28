@@ -13,36 +13,8 @@
 
 using std::vector;
 
+
 typedef float udm_type_t;
-
-class UDMatrix;
-
-class UD1D {
-public:
-	UD1D(unsigned size);
-
-protected:
-	unsigned m_size;
-	vector<udm_type_t> m_vector;
-};
-
-class UDVector : protected UD1D {
-public:
-	UDVector(unsigned size);
-
-private:
-
-	friend class UDMatrix;
-};
-
-class UDColumn : protected UD1D {
-public:
-	UDColumn(unsigned size);
-
-private:
-
-	friend class UDMatrix;
-};
 
 class UDMatrix {
 public:
@@ -51,6 +23,7 @@ public:
 	UDMatrix(unsigned _rowSize, unsigned _colSize);
 
 	void unity(float res = 1.);
+	void ones(float res = 1.);
 	void zeros(void);
 	void print(void);
 	void div(float val);
