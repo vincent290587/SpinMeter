@@ -26,40 +26,56 @@ bool test_kalman_ext(void) {
 
 	LOG_INFO("Testing Kalman...");
 
-	UDMatrix mat1(3, 3);
-	mat1.m_data[0][0] = 5;
-	mat1.m_data[0][1] = 7;
-	mat1.m_data[0][2] = 9;
-	mat1.m_data[1][0] = 4;
-	mat1.m_data[1][1] = 3;
-	mat1.m_data[1][2] = 8;
-	mat1.m_data[2][0] = 7;
-	mat1.m_data[2][1] = 5;
-	mat1.m_data[2][2] = 6;
-
-	mat1.print();
-
-	UDMatrix matx(3, 6);
-	matx.unity();
-	UDMatrix mat2(3, 3);
-	mat2 = matx.transpose();
-
-	mat2.print();
-
-	UDMatrix mat3(3, 3);
-	mat3 = mat1.invert();
-
-	mat3.print();
+//	UDMatrix mat1(3, 3);
+//	mat1.m_data[0][0] = 5;
+//	mat1.m_data[0][1] = 7;
+//	mat1.m_data[0][2] = 9;
+//	mat1.m_data[1][0] = 4;
+//	mat1.m_data[1][1] = 3;
+//	mat1.m_data[1][2] = 8;
+//	mat1.m_data[2][0] = 7;
+//	mat1.m_data[2][1] = 5;
+//	mat1.m_data[2][2] = 6;
+//
+//	mat1.print();
+//
+//	UDMatrix matx(3, 6);
+//	matx.unity();
+//
+//	UDMatrix mat2(3, 3);
+//	mat2 = matx.transpose();
+//
+//	mat2.print();
+//
+//	UDMatrix mat3(3, 3);
+//	mat3 = mat1.invert();
+//	mat3.print();
+//
+//	LOG_INFO("Invert:");
+//	mat2 = mat1 * mat3;
+//	mat2.print();
 
 	sKalmanExtDescr descr;
 	sKalmanExtFeed feed;
 
 	kalman_ext_init(&descr);
 
-	feed.gyr = 120;
-	kalman_ext_feed(&descr, &feed);
+	uint16_t numOfData = 50;
+	float omega = 2 * M_PI; // speed in rad / s
+	float sampling = 0.1; // in seconds
 
-	LOG_INFO("Kalman OK");
+	feed.dt_ms = sampling;
+	for(int i=0;i < numOfData;i++)
+	{
+		float val = 1 + 9.81 * sin(omega * sampling * i + 0.2);
+		feed.gyr = omega;
+		feed.acc[1] = val;
+		kalman_ext_feed(&descr, &feed);
+
+		LOG_INFO("Kalman OK: %f %f",
+				descr.ker.matX.m_data[0][0],
+				descr.ker.matX.m_data[1][0]);
+	}
 
 	exit(0);
 
@@ -70,10 +86,10 @@ bool test_sine_fitting(void) {
 
 	LOG_INFO("Testing sine fitting...");
 
-	uint16_t numOfData = 10;
+	uint16_t numOfData = 30;
 	float * dataz = new float[numOfData];
-	float omega = 2 * M_PI;
-	float sampling = 0.1;
+	float omega = 2. * M_PI; // speed in rad / s
+	float sampling = 0.1; // in seconds
 
 	for(int i=0;i < numOfData;i++)
 	{

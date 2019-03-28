@@ -29,8 +29,8 @@ typedef struct {
 	UDMatrix matXmi;
 	UDMatrix matPmi;
 	UDMatrix matP;
+	UDMatrix matR;
 	UDMatrix matQ;
-	float r;
 	float c_theta;
 	float s_theta;
 	float theta_p;

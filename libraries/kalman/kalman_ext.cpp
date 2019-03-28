@@ -22,7 +22,7 @@ static void _time_update(sKalmanExtDescr *descr, sKalmanExtFeed *feed) {
 	descr->ker.matA.m_data[0][1] = 1;
 	descr->ker.matA.m_data[1][0] = - feed->gyr * feed->gyr;
 
-	descr->ker.matXmi = descr->ker.matA * descr->ker.matK;
+	descr->ker.matXmi = descr->ker.matA * descr->ker.matX;
 }
 
 void kalman_ext_init(sKalmanExtDescr *descr) {
@@ -31,14 +31,12 @@ void kalman_ext_init(sKalmanExtDescr *descr) {
 	descr->is_init = 0;
 }
 
+#define OBS_DIM    2
+
 void kalman_ext_feed(sKalmanExtDescr *descr, sKalmanExtFeed *feed) {
 
 	ASSERT(descr);
 	ASSERT(feed);
-
-	// limit accelerometer vector
-	feed->acc[1] = MIN(feed->acc[1], 9.81);
-	feed->acc[1] = MAX(feed->acc[1], -9.81);
 
 	if (!descr->is_init) {
 
@@ -47,29 +45,32 @@ void kalman_ext_feed(sKalmanExtDescr *descr, sKalmanExtFeed *feed) {
 		descr->ker.matE.resize(3, 3);
 		descr->ker.matP.resize(3, 3);
 		descr->ker.matPmi.resize(3, 3);
-		descr->ker.matK.resize(3, 1);
 		descr->ker.matQ.resize(3, 3);
-		descr->ker.matX.resize(3, 1);
+		descr->ker.matR.resize(OBS_DIM, OBS_DIM);
+
 		descr->ker.matXmi.resize(3, 1);
 
-		// set K
-		descr->ker.matK.m_data[0][0] = feed->acc[1];
-		descr->ker.matK.m_data[1][0] = feed->gyr;
+		descr->ker.matK.resize(3, OBS_DIM);
+
+		// set X
+		descr->ker.matX.resize(3, 1);
+		descr->ker.matX.m_data[0][0] = feed->acc[1];
+		descr->ker.matX.m_data[1][0] = feed->gyr;
 
 		// set C
-		descr->ker.matC.resize(1, 3);
-		descr->ker.matC.m_data[0][0] = 1;
-		descr->ker.matC.m_data[0][1] = 0;
-		descr->ker.matC.m_data[0][2] = 1;
+		descr->ker.matC.resize(OBS_DIM, 3);
+		descr->ker.matC.m_data[0][1] = 1;
+		descr->ker.matC.m_data[1][0] = 1;
 
 		// TODO set Q
-		descr->ker.matQ.unity(1 / 20.);
-		descr->ker.matQ.transpose();
+		descr->ker.matQ.ones(1 / 20.);
+//		descr->ker.matQ.transpose();
 
 		// TODO set P
-		descr->ker.matP.ones(999999);
+		descr->ker.matP.ones(900);
 
-		descr->ker.r = 0.1;
+		// TODO set R
+		descr->ker.matR.ones(0.1);
 
 		descr->is_init = 1;
 
@@ -86,28 +87,30 @@ void kalman_ext_feed(sKalmanExtDescr *descr, sKalmanExtFeed *feed) {
 	descr->ker.matPmi = descr->ker.matPmi * matAt;
 	descr->ker.matPmi = descr->ker.matPmi + descr->ker.matQ;
 
-	descr->ker.matPmi.print();
-
-	// y - Cx_est
-	UDMatrix matI(1, 1);
-	matI = descr->ker.matC * descr->ker.matXmi;
-	float innov = matI.m_data[0][0] - feed->acc[1];
-
-	LOG_INFO("Innov: %f", innov);
-
 	// update kalman gain
-	UDMatrix matCt(3, 1);
+	UDMatrix matCt;
 	matCt = descr->ker.matC.transpose();
 	descr->ker.matK = descr->ker.matPmi * matCt;
-	UDMatrix matCp(1, 1);
+	UDMatrix matCp;
 	matCp = descr->ker.matC * descr->ker.matK;
-	matCp.m_data[0][0] += descr->ker.r;
-	descr->ker.matK.div(matCp.m_data[0][0]);
+	matCp = matCp + descr->ker.matR;
+	UDMatrix matCpi;
+	matCpi = matCp.invert();
+	descr->ker.matK = descr->ker.matK * matCpi;
+
+
+	// y - Cx_est
+	UDMatrix matI;
+	matI = descr->ker.matC * descr->ker.matXmi;
+	UDMatrix innov(2, 1);
+	innov.m_data[0][0] = feed->gyr;
+	innov.m_data[1][0] = asinf(feed->acc[1] / 9.81);
+
+	innov.print();
 
 	// update estimate
 	UDMatrix matKI;
-	matKI = descr->ker.matK;
-	matKI.mul(innov);
+	matKI = descr->ker.matK * innov;
 	descr->ker.matX = descr->ker.matA * descr->ker.matXmi;
 	descr->ker.matX = descr->ker.matX + matKI;
 
@@ -118,4 +121,5 @@ void kalman_ext_feed(sKalmanExtDescr *descr, sKalmanExtFeed *feed) {
 	matTmp = descr->ker.matK * descr->ker.matC;
 	matKI = matKI - matTmp;
 	descr->ker.matP = matKI * descr->ker.matPmi;
+
 }

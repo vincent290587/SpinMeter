@@ -39,7 +39,7 @@ UDMatrix UDMatrix::operator +(UDMatrix& s_mat) {
 	ASSERT(this->m_colSize == s_mat.m_colSize);
 	ASSERT(this->m_rowSize == s_mat.m_rowSize);
 
-	UDMatrix res(this->m_rowSize, this->m_rowSize);
+	UDMatrix res(this->m_rowSize, this->m_colSize);
 
 	for (unsigned i=0; i< this->m_rowSize; i++) {
 		for (unsigned j=0; j< s_mat.m_colSize; j++) {
@@ -57,7 +57,7 @@ UDMatrix UDMatrix::operator -(UDMatrix& s_mat) {
 	ASSERT(this->m_colSize == s_mat.m_colSize);
 	ASSERT(this->m_rowSize == s_mat.m_rowSize);
 
-	UDMatrix res(this->m_rowSize, this->m_rowSize);
+	UDMatrix res(this->m_rowSize, this->m_colSize);
 
 	for (unsigned i=0; i< this->m_rowSize; i++) {
 		for (unsigned j=0; j< s_mat.m_colSize; j++) {
