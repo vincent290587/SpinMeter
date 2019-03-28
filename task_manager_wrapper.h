@@ -57,10 +57,10 @@ void sysview_task_idle(void);
 
 #define TASK_BASE_NRF                  (36u)
 
-#define BOUCLE_TASK                    (TASK_BASE_NRF + 0u)
-#define PERIPH_TASK                    (TASK_BASE_NRF + 1u)
-#define LCD_TASK                       (TASK_BASE_NRF + 2u)
-#define SYSTEM_TASK                    (TASK_BASE_NRF + 3u)
+#define TASK0                          (TASK_BASE_NRF + 0u)
+#define TASK1                          (TASK_BASE_NRF + 1u)
+#define TASK2                          (TASK_BASE_NRF + 2u)
+#define TASK3                          (TASK_BASE_NRF + 3u)
 
 #define TASK_BASE                      (512u)
 

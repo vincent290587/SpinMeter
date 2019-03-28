@@ -26,16 +26,20 @@ void fdc1004_meas_trigger(void) {
 void fdc1004_wrapper_init(void)
 {
 	// init module
-	FDC1004_init();
+	if (!FDC1004_init()) {
 
-	// configure measurement
-	sChannelMeasurement ch_meas;
-	ch_meas.val = 0;
+		// configure measurement
+		sChannelMeasurement ch_meas;
+		ch_meas.val = 0;
 
-	ch_meas.bitfield.p_channel = eCHACIN1;
-	ch_meas.bitfield.n_channel = eCHACIN2;
+		ch_meas.bitfield.p_channel = eCHACIN1;
+		ch_meas.bitfield.n_channel = eCHACIN2;
 
-	FDC1004_configure_differential_measurement(0, &ch_meas);
+		FDC1004_configure_differential_measurement(0, &ch_meas);
+
+	} else {
+		LOG_ERROR("FDC 1004 init problem");
+	}
 }
 
 void fdc1004_wrapper_sensor_tasks(void) {

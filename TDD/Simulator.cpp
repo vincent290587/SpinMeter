@@ -7,7 +7,7 @@
 
 #include <stdint.h>
 #include <stdio.h>
-#include <string.h>*
+#include <string.h>
 #include "millis.h"
 #include "Model_tdd.h"
 #include "Simulator.h"

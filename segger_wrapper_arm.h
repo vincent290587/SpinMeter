@@ -43,7 +43,7 @@
 #else // USDB_ENABLED
 #define LOG_INFO(...)                  EMPTY_MACRO
 #endif // USDB_ENABLED
-#define LOG_RAW_INFO(X)                EMPTY_MACRO
+#define LOG_RAW_INFO(...)              EMPTY_MACRO
 #define LOG_DEBUG(...)                 EMPTY_MACRO
 //#define LOG_ERROR(...)                 SEGGER_SYSVIEW_ErrorfHost(__VA_ARGS__)
 #define LOG_WARNING(...)               SEGGER_SYSVIEW_WarnfHost(__VA_ARGS__)
@@ -54,7 +54,7 @@
 #elif USE_VCOM_LOGS
 #include "usb_cdc.h"
 #define LOG_INFO(...)                  usb_printf(__VA_ARGS__)
-#define LOG_RAW_INFO(X)                usb_print(X)
+#define LOG_RAW_INFO(...)                usb_print(X)
 #define LOG_WARNING(...)               usb_printf(__VA_ARGS__)
 #define LOG_DEBUG(...)                 EMPTY_MACRO
 #define LOG_ERROR(...)                 usb_printf(__VA_ARGS__)
@@ -69,7 +69,7 @@
 #elif NRF_LOG_ENABLED
 #include "SEGGER_RTT.h"
 #define LOG_INFO(...)                  SEGGER_RTT_printf(0, __VA_ARGS__);SEGGER_RTT_PutChar(0, '\r');SEGGER_RTT_PutChar(0, '\n')
-#define LOG_RAW_INFO(X)                EMPTY_MACRO
+#define LOG_RAW_INFO(...)                EMPTY_MACRO
 #define LOG_WARNING(...)               SEGGER_RTT_printf(0, __VA_ARGS__);SEGGER_RTT_PutChar(0, '\r');SEGGER_RTT_PutChar(0, '\n')
 #define LOG_DEBUG(...)                 EMPTY_MACRO
 #define LOG_ERROR(...)                 SEGGER_RTT_printf(0, __VA_ARGS__);SEGGER_RTT_PutChar(0, '\r');SEGGER_RTT_PutChar(0, '\n')
@@ -81,7 +81,7 @@
 #define USB_PRINT(...)                 EMPTY_MACRO
 #else
 #define LOG_INFO(...)                  EMPTY_MACRO
-#define LOG_RAW_INFO(X)                EMPTY_MACRO
+#define LOG_RAW_INFO(...)              EMPTY_MACRO
 #define LOG_WARNING(...)               EMPTY_MACRO
 #define LOG_DEBUG(...)                 EMPTY_MACRO
 #define LOG_ERROR(...)                 EMPTY_MACRO

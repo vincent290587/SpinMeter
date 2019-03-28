@@ -48,7 +48,8 @@ set(SRCS
 	timer/timer.c
 	drivers/ant_tdd.c
 	drivers/gpio_tdd.cpp
-	libraries/kalman/kalman_ext.c
+	libraries/kalman/kalman_ext.cpp
+	libraries/kalman/UDMatrix.cpp
     libraries/kalman/sine_fitter.cpp
     libraries/utils/WString.cpp
 	libraries/utils/utils.c

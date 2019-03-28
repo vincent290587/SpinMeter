@@ -20,7 +20,7 @@ static uint32_t nb_tasks;
 SEGGER_SYSVIEW_OS_API os_api;
 
 SEGGER_SYSVIEW_MODULE m_module = {
-		"M=stravaV10",
+		"M=SpinMeter",
 		30,
 		0,
 };
@@ -141,14 +141,14 @@ void segger_init(void) {
 
 	  nb_tasks = 0;
 
-	  pInfo[nb_tasks].TaskID = BOUCLE_TASK;
-	  pInfo[nb_tasks++].sName  = "BOUCLE_TASK";
+	  pInfo[nb_tasks].TaskID = TASK0;
+	  pInfo[nb_tasks++].sName  = "Task 0";
 
-	  pInfo[nb_tasks].TaskID = PERIPH_TASK;
-	  pInfo[nb_tasks++].sName  = "PERIPH_TASK";
+	  pInfo[nb_tasks].TaskID = TASK1;
+	  pInfo[nb_tasks++].sName  = "Task 1";
 
-	  pInfo[nb_tasks].TaskID = LCD_TASK;
-	  pInfo[nb_tasks++].sName  = "LCD_TASK";
+	  pInfo[nb_tasks].TaskID = TASK2;
+	  pInfo[nb_tasks++].sName  = "Task 2";
 
 	  SEGGER_SYSVIEW_Conf();
 
