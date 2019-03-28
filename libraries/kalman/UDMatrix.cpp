@@ -17,7 +17,17 @@ UDVector::UDVector(unsigned size) : UD1D(size) {
 UDColumn::UDColumn(unsigned size) : UD1D(size) {
 }
 
+UDMatrix::UDMatrix(UDMatrix &mat) : m_data(mat.m_data), m_rowSize(mat.m_rowSize), m_colSize(mat.m_colSize) {
+
+}
+
 UDMatrix::UDMatrix(unsigned _rowSize, unsigned _colSize) : m_rowSize(_rowSize), m_colSize(_colSize) {
+
+	this->resize(_rowSize, _colSize);
+
+}
+
+void UDMatrix::resize(unsigned _rowSize, unsigned _colSize) {
 
 	// assign zeros
 	vector<udm_type_t> tmp (_colSize,0);
@@ -94,7 +104,7 @@ void UDMatrix::print(void) {
 	for (unsigned i=0; i< this->m_rowSize; i++) {
 		for (unsigned j=0; j< this->m_colSize; j++) {
 
-			LOG_RAW_INFO("%f ", this->m_data[i][j] );
+			LOG_RAW_INFO("%.3f ", this->m_data[i][j] );
 
 		}
 		LOG_RAW_INFO("\r\n");
@@ -178,12 +188,12 @@ UDMatrix UDMatrix::invert() {
 	return res;
 }
 
-void UDMatrix::unity(void) {
+void UDMatrix::unity(float res) {
 
 	for (unsigned i=0; i< this->m_rowSize; i++) {
 		for (unsigned j=0; j< this->m_colSize; j++) {
 
-			this->m_data[i][j] = i == j ? 1:0;
+			this->m_data[i][j] = i == j ? res:0;
 
 		}
 	}

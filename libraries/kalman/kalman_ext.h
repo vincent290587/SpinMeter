@@ -9,6 +9,7 @@
 #define LIBRARIES_KALMAN_KALMAN_EXT_H_
 
 #include <stdint.h>
+#include "UDMatrix.h"
 
 /**
  * Input used to estimate the rotation rate only
@@ -20,7 +21,14 @@ typedef struct {
 } sKalmanExtFeed;
 
 typedef struct {
-	float dx;
+	UDMatrix matC;
+	UDMatrix matE;
+	UDMatrix matK;
+	UDMatrix matX;
+	UDMatrix matXmi;
+	UDMatrix matPmi;
+	UDMatrix matP;
+	UDMatrix matQ;
 	float c_theta;
 	float s_theta;
 	float theta_p;

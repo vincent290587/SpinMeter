@@ -10,7 +10,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include "Model_tdd.h"
-#include "kalman_ext.h"
+#include "UDMatrix.h"
 #include "sine_fitter.h"
 #include "fram.h"
 #include "utils.h"
@@ -25,7 +25,34 @@ bool test_kalman_ext(void) {
 
 	LOG_INFO("Testing Kalman...");
 
+	UDMatrix mat1(3, 3);
+	mat1.m_data[0][0] = 5;
+	mat1.m_data[0][1] = 7;
+	mat1.m_data[0][2] = 9;
+	mat1.m_data[1][0] = 4;
+	mat1.m_data[1][1] = 3;
+	mat1.m_data[1][2] = 8;
+	mat1.m_data[2][0] = 7;
+	mat1.m_data[2][1] = 5;
+	mat1.m_data[2][2] = 6;
+
+	mat1.print();
+
+	UDMatrix matx(3, 6);
+	matx.unity();
+	UDMatrix mat2(3, 3);
+	mat2 = matx.transpose();
+
+	mat2.print();
+
+	UDMatrix mat3(3, 3);
+	mat3 = mat1.invert();
+
+	mat3.print();
+
 	LOG_INFO("Kalman OK");
+
+	exit(0);
 
 	return true;
 }
@@ -53,8 +80,6 @@ bool test_sine_fitting(void) {
 			output.phi);
 
 	LOG_INFO("Fitting OK");
-
-	exit(0);
 
 	return true;
 }
