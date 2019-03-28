@@ -5,6 +5,8 @@
  *      Author: Vincent
  */
 
+#include "boards.h"
+#include "helper.h"
 #include "i2c.h"
 #include "i2c_scheduler.h"
 #include "segger_wrapper.h"
@@ -17,12 +19,39 @@
 #include "Model.h"
 
 
+static void _int1_handler(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action)
+{
+
+	W_SYSVIEW_RecordEnterISR();
+
+    // schedule sensor reading
+	bmg250_wrapper_schedule_sensor();
+
+	// trigger a measurement in the lis2dw & bmg250
+	lis2dw12_meas_trigger();
+
+	fdc1004_meas_trigger();
+
+	W_SYSVIEW_RecordExitISR();
+}
+
 /**
  *
  */
 static void _i2c_scheduling_sensors_post_init(void) {
 
-	LOG_WARNING("Sensors initialized");
+	// configure GPIOTE
+	nrfx_gpiote_in_config_t in_config;
+	in_config.is_watcher = false;
+	in_config.hi_accuracy = true;
+	in_config.skip_gpio_setup = false;
+	in_config.pull = NRF_GPIO_PIN_PULLDOWN;
+	in_config.sense = NRF_GPIOTE_POLARITY_LOTOHI;
+
+	ret_code_t err_code = nrfx_gpiote_in_init(GYR_INT1, &in_config, _int1_handler);
+	APP_ERROR_CHECK(err_code);
+
+	nrfx_gpiote_in_event_enable(GYR_INT1, true);
 }
 
 
@@ -46,6 +75,8 @@ void i2c_scheduling_init(void) {
 
 	_i2c_scheduling_sensors_init();
 
+	LOG_WARNING("Sensors initialized");
+
 	// post-init steps
 	_i2c_scheduling_sensors_post_init();
 
@@ -54,9 +85,6 @@ void i2c_scheduling_init(void) {
 void i2c_scheduling_tasks(void) {
 
 	if (bmg250_wrapper_is_updated()) {
-		// trigger a measurement in the lis2dw & bmg250
-		lis2dw12_meas_trigger();
-		fdc1004_meas_trigger();
 		bmg250_wrapper_sensor_refresh();
 	}
 	if (lis2dw12_wrapper_is_updated()) {

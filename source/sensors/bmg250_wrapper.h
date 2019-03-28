@@ -17,6 +17,8 @@ extern "C" {
 
 void bmg250_wrapper_init(void);
 
+void bmg250_wrapper_schedule_sensor(void);
+
 bool bmg250_wrapper_is_updated(void);
 
 void bmg250_wrapper_clear_updated(void);

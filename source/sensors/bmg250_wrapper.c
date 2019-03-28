@@ -8,7 +8,6 @@
 
 #include <stdint.h>
 #include "i2c.h"
-#include "boards.h"
 #include "helper.h"
 #include "bmg250.h"
 #include "nrf_twi_mngr.h"
@@ -70,6 +69,8 @@ static int8_t _bmg_i2c_write(uint8_t dev_id, uint8_t reg_addr, uint8_t *data, ui
 
 static void _bmg250_readout_cb(ret_code_t result, void * p_user_data) {
 
+	W_SYSVIEW_RecordEnterISR();
+
 	uint8_t idx = 0;
 	uint8_t lsb;
 	uint8_t msb;
@@ -104,9 +105,11 @@ static void _bmg250_readout_cb(ret_code_t result, void * p_user_data) {
 
 	LOG_DEBUG("BMG250 read");
 
+	W_SYSVIEW_RecordExitISR();
+
 }
 
-static void _bmg250_read_sensor(void) {
+void bmg250_wrapper_schedule_sensor(void) {
 
 	static uint8_t p_ans_buffer[12] = {0};
 
@@ -127,12 +130,6 @@ static void _bmg250_read_sensor(void) {
 
 	i2c_schedule(&transaction);
 
-}
-
-static void _int1_handler(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action)
-{
-    // schedule sensor reading
-	_bmg250_read_sensor();
 }
 
 void bmg250_wrapper_init(void) {
@@ -184,14 +181,6 @@ void bmg250_wrapper_init(void) {
 
 	/* Set the desired configuration in the sensor */
 	rslt = bmg250_set_int_config(&int_conf, &m_gyro);
-
-	nrfx_gpiote_in_config_t in_config = NRFX_GPIOTE_CONFIG_IN_SENSE_LOTOHI(true);
-	in_config.pull = NRF_GPIO_PIN_PULLDOWN;
-
-	ret_code_t err_code = nrfx_gpiote_in_init(GYR_INT1, &in_config, _int1_handler);
-	APP_ERROR_CHECK(err_code);
-
-	nrfx_gpiote_in_event_enable(GYR_INT1, true);
 }
 
 bool bmg250_wrapper_is_updated(void) {
