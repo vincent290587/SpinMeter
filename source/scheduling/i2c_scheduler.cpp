@@ -85,9 +85,11 @@ void i2c_scheduling_init(void) {
 void i2c_scheduling_tasks(void) {
 
 	if (bmg250_wrapper_is_updated()) {
+		sysview_task_transfer(0);
 		bmg250_wrapper_sensor_refresh();
 	}
 	if (lis2dw12_wrapper_is_updated()) {
+		sysview_task_transfer(1);
 		lis2dw12_wrapper_sensor_refresh();
 		// TODO trigger kalman
 	}

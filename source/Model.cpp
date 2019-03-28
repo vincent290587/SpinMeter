@@ -9,7 +9,6 @@
 #include "sdk_config.h"
 #include "helper.h"
 #include "app_scheduler.h"
-#include "hardfault_genhf.h"
 #include "segger_wrapper.h"
 
 #include "i2c_scheduler.h"

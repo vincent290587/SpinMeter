@@ -400,10 +400,18 @@ int main(void)
 
 	for (;;) {
 
-		nrf_delay_ms(1000);
+#if APP_SCHEDULER_ENABLED
+		app_sched_execute();
+#endif
 
+		i2c_scheduling_tasks();
 
-		LOG_INFO("App run");
+		LOG_DEBUG("App run");
+
+    	//No more logs to process, go to sleep
+		sysview_task_idle();
+
+		nrf_pwr_mgmt_run();
 	}
 
 }

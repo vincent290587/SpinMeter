@@ -67,6 +67,8 @@ static int32_t _lis_i2c_write(void *handle, uint8_t reg_addr, uint8_t *data, uin
 
 static void _lis2dw12_readout_cb(ret_code_t result, void * p_user_data) {
 
+	W_SYSVIEW_RecordEnterISR();
+
 	axis3bit16_t *data_raw_acceleration = (axis3bit16_t*)p_user_data;
 
 	ASSERT(p_user_data);
@@ -83,6 +85,8 @@ static void _lis2dw12_readout_cb(ret_code_t result, void * p_user_data) {
 	m_is_updated = true;
 
 	LOG_DEBUG("LIS2DW read");
+
+	W_SYSVIEW_RecordExitISR();
 
 }
 
