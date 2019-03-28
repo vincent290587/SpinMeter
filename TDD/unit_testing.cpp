@@ -11,6 +11,7 @@
 #include <stdbool.h>
 #include "Model_tdd.h"
 #include "UDMatrix.h"
+#include "kalman_ext.h"
 #include "sine_fitter.h"
 #include "fram.h"
 #include "utils.h"
@@ -49,6 +50,14 @@ bool test_kalman_ext(void) {
 	mat3 = mat1.invert();
 
 	mat3.print();
+
+	sKalmanExtDescr descr;
+	sKalmanExtFeed feed;
+
+	kalman_ext_init(&descr);
+
+	feed.gyr = 120;
+	kalman_ext_feed(&descr, &feed);
 
 	LOG_INFO("Kalman OK");
 

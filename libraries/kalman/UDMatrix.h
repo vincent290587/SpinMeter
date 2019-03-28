@@ -46,12 +46,15 @@ private:
 
 class UDMatrix {
 public:
+	UDMatrix(void);
 	UDMatrix(UDMatrix &mat);
 	UDMatrix(unsigned _rowSize, unsigned _colSize);
 
 	void unity(float res = 1.);
 	void zeros(void);
 	void print(void);
+	void div(float val);
+	void mul(float val);
 	void resize(unsigned _rowSize, unsigned _colSize);
 
 	UDMatrix operator+(UDMatrix &s_mat);

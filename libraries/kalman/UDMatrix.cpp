@@ -6,6 +6,7 @@
  */
 
 #include "UDMatrix.h"
+#include "assert_wrapper.h"
 #include "segger_wrapper.h"
 
 UD1D::UD1D(unsigned size): m_size(size) {
@@ -21,6 +22,10 @@ UDMatrix::UDMatrix(UDMatrix &mat) : m_data(mat.m_data), m_rowSize(mat.m_rowSize)
 
 }
 
+UDMatrix::UDMatrix(void) : m_rowSize(0), m_colSize(0) {
+
+}
+
 UDMatrix::UDMatrix(unsigned _rowSize, unsigned _colSize) : m_rowSize(_rowSize), m_colSize(_colSize) {
 
 	this->resize(_rowSize, _colSize);
@@ -32,10 +37,14 @@ void UDMatrix::resize(unsigned _rowSize, unsigned _colSize) {
 	// assign zeros
 	vector<udm_type_t> tmp (_colSize,0);
 	m_data.assign(_rowSize, tmp);
-
+	m_rowSize = _rowSize;
+	m_colSize = _colSize;
 }
 
 UDMatrix UDMatrix::operator +(UDMatrix& s_mat) {
+
+	ASSERT(this->m_colSize == s_mat.m_colSize);
+	ASSERT(this->m_rowSize == s_mat.m_rowSize);
 
 	UDMatrix res(this->m_rowSize, this->m_rowSize);
 
@@ -52,6 +61,9 @@ UDMatrix UDMatrix::operator +(UDMatrix& s_mat) {
 
 UDMatrix UDMatrix::operator -(UDMatrix& s_mat) {
 
+	ASSERT(this->m_colSize == s_mat.m_colSize);
+	ASSERT(this->m_rowSize == s_mat.m_rowSize);
+
 	UDMatrix res(this->m_rowSize, this->m_rowSize);
 
 	for (unsigned i=0; i< this->m_rowSize; i++) {
@@ -66,6 +78,9 @@ UDMatrix UDMatrix::operator -(UDMatrix& s_mat) {
 }
 
 UDMatrix UDMatrix::operator *(UDMatrix& s_mat) {
+
+	LOG_INFO("%u %u", this->m_colSize, s_mat.m_rowSize);
+	ASSERT(this->m_colSize == s_mat.m_rowSize);
 
 	UDMatrix res(this->m_rowSize, s_mat.m_colSize);
 
@@ -97,6 +112,30 @@ UDMatrix UDMatrix::transpose() {
 	return res;
 }
 
+void UDMatrix::div(float val) {
+
+	for (unsigned i=0; i< this->m_rowSize; i++) {
+		for (unsigned j=0; j< this->m_colSize; j++) {
+
+			this->m_data[i][j] = this->m_data[i][j] * val;
+
+		}
+	}
+
+}
+
+void UDMatrix::mul(float val) {
+
+	for (unsigned i=0; i< this->m_rowSize; i++) {
+		for (unsigned j=0; j< this->m_colSize; j++) {
+
+			this->m_data[i][j] = this->m_data[i][j] * val;
+
+		}
+	}
+
+}
+
 void UDMatrix::print(void) {
 
 	LOG_RAW_INFO("----------  Matrix ---------------");
@@ -117,6 +156,8 @@ void UDMatrix::print(void) {
  * https://www.geeksforgeeks.org/finding-inverse-of-a-matrix-using-gauss-jordan-method/
  */
 UDMatrix UDMatrix::invert() {
+
+	ASSERT(this->m_colSize == this->m_rowSize);
 
 	float temp;
 	const unsigned order = this->m_rowSize;

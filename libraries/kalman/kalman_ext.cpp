@@ -18,11 +18,11 @@
 
 static void _time_update(sKalmanExtDescr *descr, sKalmanExtFeed *feed) {
 
-	UDMatrix matA(3, 3);
-	matA.m_data[0][1] = 1;
-	matA.m_data[1][0] = - feed->gyr * feed->gyr;
+	descr->ker.matA.zeros();
+	descr->ker.matA.m_data[0][1] = 1;
+	descr->ker.matA.m_data[1][0] = - feed->gyr * feed->gyr;
 
-	descr->ker.matXmi = matA * descr->ker.matK;
+	descr->ker.matXmi = descr->ker.matA * descr->ker.matK;
 }
 
 void kalman_ext_init(sKalmanExtDescr *descr) {
@@ -46,10 +46,12 @@ void kalman_ext_feed(sKalmanExtDescr *descr, sKalmanExtFeed *feed) {
 		descr->ker.theta_p = feed->gyr;
 		descr->ker.theta_p_offset = 0.0;
 
-		// TODO size matrixes
+		// size matrixes
+		descr->ker.matA.resize(3, 3);
 		descr->ker.matE.resize(3, 3);
 		descr->ker.matP.resize(3, 3);
-		descr->ker.matK.resize(3, 3);
+		descr->ker.matPmi.resize(3, 3);
+		descr->ker.matK.resize(3, 1);
 		descr->ker.matQ.resize(3, 3);
 		descr->ker.matX.resize(3, 1);
 		descr->ker.matXmi.resize(3, 1);
@@ -59,22 +61,23 @@ void kalman_ext_feed(sKalmanExtDescr *descr, sKalmanExtFeed *feed) {
 		descr->ker.matC.m_data[0][1] = 0;
 		descr->ker.matC.m_data[0][2] = 1;
 
+		// TODO set Q
+		descr->ker.matQ.m_data[0][2] = 1;
+		descr->ker.matQ.m_data[1][1] = 0;
+		descr->ker.matQ.m_data[2][0] = 1;
+
 		descr->is_init = 1;
-
-	} else {
-
-		_time_update(descr, feed);
 
 	}
 
+	_time_update(descr, feed);
+
 	// Measurement update
-	UDMatrix matA(3, 3);
 	UDMatrix matAt(3, 3);
-	matA = (descr->ker.matC * descr->ker.matXmi);
-	matAt = matA.transpose();
+	matAt = descr->ker.matA.transpose();
 
 	// project covariance
-	descr->ker.matPmi = matA * descr->ker.matP;
+	descr->ker.matPmi = descr->ker.matA * descr->ker.matP;
 	descr->ker.matPmi = descr->ker.matPmi * matAt;
 	descr->ker.matPmi = descr->ker.matPmi + descr->ker.matQ;
 
@@ -83,21 +86,27 @@ void kalman_ext_feed(sKalmanExtDescr *descr, sKalmanExtFeed *feed) {
 	matI = descr->ker.matC * descr->ker.matXmi;
 	float innov = matI.m_data[0][0] - feed->gyr;
 
-	// TODO update kalman gain
+	// update kalman gain
 	UDMatrix matCt(3, 1);
 	matCt = descr->ker.matC.transpose();
 	descr->ker.matK = descr->ker.matPmi * matCt;
+	UDMatrix matCp(1, 1);
+	matCp = descr->ker.matC * descr->ker.matK;
+	matCp.m_data[0][0] += descr->ker.r;
+	descr->ker.matK.div(matCp.m_data[0][0]);
 
 	// update estimate
-	UDMatrix matKI(3, 3);
-	matKI.unity(innov);
-	matKI = descr->ker.matK * matKI;
-	descr->ker.matX = matA * descr->ker.matXmi;
+	UDMatrix matKI;
+	matKI = descr->ker.matK;
+	matKI.mul(innov);
+	descr->ker.matX = descr->ker.matA * descr->ker.matXmi;
 	descr->ker.matX = descr->ker.matX + matKI;
 
 	// update covariance
+	UDMatrix matTmp(3, 3);
+	matKI.resize(3, 3);
 	matKI.unity();
-	matA = descr->ker.matK * descr->ker.matC;
-	matKI = matKI - matA;
-	descr->ker.matP = matKI - descr->ker.matPmi;
+	matTmp = descr->ker.matK * descr->ker.matC;
+	matKI = matKI - matTmp;
+	descr->ker.matP = matKI * descr->ker.matPmi;
 }

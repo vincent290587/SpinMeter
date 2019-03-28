@@ -21,6 +21,7 @@ typedef struct {
 } sKalmanExtFeed;
 
 typedef struct {
+	UDMatrix matA;
 	UDMatrix matC;
 	UDMatrix matE;
 	UDMatrix matK;
@@ -29,6 +30,7 @@ typedef struct {
 	UDMatrix matPmi;
 	UDMatrix matP;
 	UDMatrix matQ;
+	float r;
 	float c_theta;
 	float s_theta;
 	float theta_p;
