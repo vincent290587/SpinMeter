@@ -1,3 +1,6 @@
 [submodule "libraries/BMG250-API"]
 	path = libraries/BMG250-API
 	url = https://github.com/vincent290587/BMG250-API.git
+[submodule "libraries/FDC1004"]
+	path = libraries/FDC1004
+	url = https://github.com/vincent290587/FDC1004.git

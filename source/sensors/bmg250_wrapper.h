@@ -19,6 +19,8 @@ void bmg250_wrapper_init(void);
 
 bool bmg250_wrapper_is_updated(void);
 
+void bmg250_wrapper_clear_updated(void);
+
 void bmg250_wrapper_sensor_refresh(void);
 
 
