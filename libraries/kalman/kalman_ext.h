@@ -15,9 +15,8 @@
  * Input used to estimate the rotation rate only
  */
 typedef struct {
-	float acc[3];
-	float gyr;
-	uint32_t dt_ms;
+	float dt;
+	UDMatrix matZ;
 } sKalmanExtFeed;
 
 typedef struct {
@@ -31,25 +30,19 @@ typedef struct {
 	UDMatrix matP;
 	UDMatrix matR;
 	UDMatrix matQ;
-	float c_theta;
-	float s_theta;
-	float theta_p;
-	float theta_p_offset;
+	uint16_t obs_dim;
+	uint16_t ker_dim;
+} sKalmanLinKernel;
+
+typedef struct {
+	UDMatrix matH;
 } sKalmanExtKernel;
 
 typedef struct {
-	float p_mat;
-	float q_mat;
-	float r_mat;
-	float k_mat;
-} sKalmanExtCovs;
-
-typedef struct {
-	sKalmanExtKernel ker;
-	sKalmanExtKernel innov;
-	sKalmanExtCovs cov;
+	sKalmanLinKernel ker;
+	sKalmanExtKernel ker_ext;
 	uint8_t is_init;
-} sKalmanExtDescr;
+} sKalmanDescr;
 
 
 #ifdef	__cplusplus
@@ -57,9 +50,13 @@ extern "C" {
 #endif
 
 
-void kalman_ext_init(sKalmanExtDescr *descr);
+void kalman_lin_init(sKalmanDescr *descr);
 
-void kalman_ext_feed(sKalmanExtDescr *descr, sKalmanExtFeed *feed);
+void kalman_ext_init(sKalmanDescr *descr);
+
+void kalman_lin_feed(sKalmanDescr *descr, sKalmanExtFeed *feed);
+
+void kalman_ext_feed(sKalmanDescr *descr, sKalmanExtFeed *feed);
 
 
 #ifdef	__cplusplus

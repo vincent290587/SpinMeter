@@ -55,27 +55,55 @@ bool test_kalman_ext(void) {
 //	mat2 = mat1 * mat3;
 //	mat2.print();
 
-	sKalmanExtDescr descr;
+	uint16_t numOfData = 30;
+	float omega = 2 * M_PI; // speed in rad / s
+	float sampling = 1; // in seconds
+
+	sKalmanDescr descr;
 	sKalmanExtFeed feed;
 
-	kalman_ext_init(&descr);
+	descr.ker.ker_dim = 2;
+	descr.ker.obs_dim = 1;
 
-	uint16_t numOfData = 50;
-	float omega = 2 * M_PI; // speed in rad / s
-	float sampling = 0.1; // in seconds
+	feed.dt = sampling;
 
-	feed.dt_ms = sampling;
+	kalman_lin_init(&descr);
+
+	feed.matZ.resize(1, 1);
+
+	descr.ker.matA.unity();
+
+	descr.ker.matA.print();
+
+	descr.ker.matC.set(0, 0, 1);
+
+	// set Q
+	descr.ker.matQ.unity(1 / 20.);
+
+	// set P
+	descr.ker.matP.ones(900);
+
+	// set R
+	descr.ker.matR.unity(0.1);
+
+	float val;
 	for(int i=0;i < numOfData;i++)
 	{
-		float val = 1 + 9.81 * sin(omega * sampling * i + 0.2);
-		feed.gyr = omega;
-		feed.acc[1] = val;
-		kalman_ext_feed(&descr, &feed);
+		val = 22 +  5 * i;
 
-		LOG_INFO("Kalman OK: %f %f",
-				descr.ker.matX.m_data[0][0],
-				descr.ker.matX.m_data[1][0]);
+		descr.ker.matA.set(0, 1, feed.dt);
+
+		feed.matZ.ones(0.0);
+		feed.matZ.set(0, 0, val);
+
+		kalman_lin_feed(&descr, &feed);
+
+		UDMatrix res;
+		res = descr.ker.matX;
+		res.print();
 	}
+
+	LOG_INFO("Simulated pos: %f", val);
 
 	exit(0);
 

@@ -15,7 +15,7 @@ UDMatrix::UDMatrix(void) : m_rowSize(0), m_colSize(0) {
 
 }
 
-UDMatrix::UDMatrix(UDMatrix &mat) : m_data(mat.m_data), m_rowSize(mat.m_rowSize), m_colSize(mat.m_colSize) {
+UDMatrix::UDMatrix(UDMatrix &mat) : m_rowSize(mat.m_rowSize), m_colSize(mat.m_colSize), m_data(mat.m_data) {
 
 }
 
@@ -137,7 +137,7 @@ void UDMatrix::print(void) {
 	for (unsigned i=0; i< this->m_rowSize; i++) {
 		for (unsigned j=0; j< this->m_colSize; j++) {
 
-			LOG_RAW_INFO("%.3f ", this->m_data[i][j] );
+			LOG_RAW_INFO("%3.3f ", this->m_data[i][j] );
 
 		}
 		LOG_RAW_INFO("\r\n");
@@ -214,6 +214,10 @@ UDMatrix UDMatrix::invert() {
 	for (unsigned i = 0; i < order; i++) {
 
 		temp = t_mat.m_data[i][i];
+		if (temp == 0.0F) {
+			LOG_ERROR("Not inversible");
+			temp = 9999999;
+		}
 		for (unsigned j = 0; j < order; j++) {
 
 			res.m_data[i][j] = t_mat.m_data[i][j+order] / temp;
@@ -221,6 +225,15 @@ UDMatrix UDMatrix::invert() {
 	}
 
 	return res;
+}
+
+void UDMatrix::set(unsigned x, unsigned y, udm_type_t val) {
+
+	ASSERT(x >= 0 && x < m_rowSize);
+	ASSERT(y >= 0 && y < m_colSize);
+
+	this->m_data[x][y] = val;
+
 }
 
 void UDMatrix::unity(float res) {
