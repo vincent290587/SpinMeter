@@ -55,6 +55,67 @@ bool test_kalman_ext(void) {
 //	mat2 = mat1 * mat3;
 //	mat2.print();
 
+	float sampling = 0.5;
+	uint16_t numOfData = 30;
+
+	sKalmanDescr descr;
+	sKalmanExtFeed feed;
+
+	descr.ker.ker_dim = 4;
+	descr.ker.obs_dim = 5;
+
+	feed.dt = sampling;
+
+	kalman_ext_init(&descr);
+
+	feed.matZ.resize(5, 1);
+
+	descr.ker.matA.unity();
+	descr.ker.matA.set(1, 0, 1);
+	descr.ker.matA.print();
+
+	// TODO set H
+//	descr.ker_ext.matH
+
+	// set Q
+	descr.ker.matQ.unity(1 / 20.);
+
+	// set P
+	descr.ker.matP.ones(900);
+
+	// set R
+	descr.ker.matR.unity(0.1);
+
+	float val;
+	for(int i=0;i < numOfData;i++)
+	{
+		descr.ker.matC.set(0, 0, 1);
+
+		descr.ker.matA.set(0, 2, feed.dt);
+		descr.ker.matA.set(1, 2, feed.dt);
+
+		val = 22 +  5 * i;
+		feed.matZ.ones(0.0);
+		feed.matZ.set(0, 0, val);
+
+		kalman_ext_feed(&descr, &feed);
+
+		UDMatrix res;
+		res = descr.ker.matX;
+		res.print();
+	}
+
+	LOG_INFO("Simulated pos: %f", val);
+
+	exit(0);
+
+	return true;
+}
+
+bool test_kalman_lin(void) {
+
+	LOG_INFO("Testing Kalman...");
+
 	uint16_t numOfData = 30;
 	float omega = 2 * M_PI; // speed in rad / s
 	float sampling = 1; // in seconds

@@ -61,9 +61,9 @@ void kalman_ext_init(sKalmanDescr *descr) {
 	kalman_lin_init(descr);
 
 	// set H
+	descr->ker_ext.matH.resize(descr->ker.obs_dim, descr->ker.ker_dim);
 	// it must be the jacobian matrix
 	// first line: dZ1 / dState[co]
-	descr->ker_ext.matH.resize(descr->ker.obs_dim, descr->ker.ker_dim);
 
 	// C now maps the state vector to the measurements
 	// first val: Z1 = f(State[])

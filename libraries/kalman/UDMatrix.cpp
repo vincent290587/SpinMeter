@@ -236,6 +236,15 @@ void UDMatrix::set(unsigned x, unsigned y, udm_type_t val) {
 
 }
 
+udm_type_t UDMatrix::get(unsigned x, unsigned y) {
+
+	ASSERT(x >= 0 && x < m_rowSize);
+	ASSERT(y >= 0 && y < m_colSize);
+
+	return this->m_data[x][y];
+
+}
+
 void UDMatrix::unity(float res) {
 
 	for (unsigned i=0; i< this->m_rowSize; i++) {

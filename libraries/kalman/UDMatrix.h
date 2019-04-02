@@ -22,6 +22,7 @@ public:
 	UDMatrix(UDMatrix &mat);
 	UDMatrix(unsigned _rowSize, unsigned _colSize);
 
+	udm_type_t get(unsigned x, unsigned y);
 	void set(unsigned x, unsigned y, udm_type_t val);
 	void unity(float res = 1.);
 	void ones(float res = 1.);
