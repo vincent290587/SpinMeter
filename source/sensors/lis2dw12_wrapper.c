@@ -157,7 +157,7 @@ void lis2dw12_wrapper_init(void)
 	/*
 	 * Set full scale
 	 */
-	lis2dw12_full_scale_set(&dev_ctx, LIS2DW12_8g);
+	lis2dw12_full_scale_set(&dev_ctx, LIS2DW12_16g);
 
 	/*
 	 * Configure filtering chain
@@ -170,12 +170,12 @@ void lis2dw12_wrapper_init(void)
 	/*
 	 * Configure power mode
 	 */
-	lis2dw12_power_mode_set(&dev_ctx, LIS2DW12_SINGLE_LOW_PWR_LOW_NOISE_3);
+	lis2dw12_power_mode_set(&dev_ctx, LIS2DW12_SINGLE_LOW_PWR_3);
 
 	/*
 	 * Set Output Data Rate
 	 */
-	lis2dw12_data_rate_set(&dev_ctx, LIS2DW12_XL_SET_PIN_TRIG);
+	lis2dw12_data_rate_set(&dev_ctx, LIS2DW12_XL_ODR_25Hz);
 
 	/*
 	 * Enable interrupt generation on data ready INT1 pin

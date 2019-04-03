@@ -23,6 +23,7 @@ bool lis2dw12_wrapper_is_updated(void);
 
 void lis2dw12_wrapper_sensor_refresh(void);
 
+void lis2dw12_wrapper_set_wake(void);
 
 #ifdef __cplusplus
 }

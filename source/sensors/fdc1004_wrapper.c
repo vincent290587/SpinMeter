@@ -27,6 +27,13 @@ void fdc1004_meas_trigger(void) {
 
 void fdc1004_wrapper_init(void)
 {
+
+	// reset chip
+	sChannelTrigger trigger;
+	trigger.val = 0;
+	trigger.bitfield.rst = 1;
+	FDC1004_trigger_measurement(&trigger);
+
 	uint8_t ret = FDC1004_init();
 	// init module
 	if (!ret) {

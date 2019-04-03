@@ -161,7 +161,7 @@ extern "C" void app_error_fault_handler(uint32_t id, uint32_t pc, uint32_t info)
 		break;
 	}
 
-	NRF_LOG_FLUSH();
+	LOG_FLUSH();
 
 #ifdef DEBUG_NRF
 	NRF_BREAKPOINT_COND;
@@ -215,6 +215,7 @@ void bsp_tasks(void)
 	{
 	case BSP_EVENT_KEY_0:
 		// TODO process
+		nrf_pwr_mgmt_shutdown(NRF_PWR_MGMT_SHUTDOWN_STAY_IN_SYSOFF);
 		break;
 	default:
 		return; // no implementation needed
@@ -237,6 +238,9 @@ void bsp_tasks(void)
 static bool app_shutdown_handler(nrf_pwr_mgmt_evt_t event)
 {
 	if (NRF_PWR_MGMT_EVT_PREPARE_SYSOFF == event) {
+
+		nrf_gpio_pin_clear(HV_EN);
+		nrf_gpio_pin_set(N_VCCINT_EN);
 
 		return true;
 	} else if (NRF_PWR_MGMT_EVT_PREPARE_DFU == event) {
@@ -379,10 +383,12 @@ int main(void)
 	buttons_leds_init();
 	nrf_gpio_pin_set(LED_1);
 
+	nrf_delay_ms(2);
+
 	// drivers
 	i2c_init();
 
-	nrf_delay_ms(200);
+	nrf_delay_ms(7);
 
 	// init BLE + ANT
 #ifdef SOFTDEVICE_PRESENT
@@ -407,7 +413,6 @@ int main(void)
 	LOG_INFO("App init done");
 
 	nrf_gpio_pin_clear(LED_1);
-
 
 	for (;;) {
 
