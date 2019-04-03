@@ -38,7 +38,7 @@ void i2c_init(void) {
     nrf_drv_twi_config_t const config = {
        .scl                = SCL_PIN_NUMBER,
        .sda                = SDA_PIN_NUMBER,
-       .frequency          = NRF_DRV_TWI_FREQ_100K,
+       .frequency          = NRF_TWI_FREQ_400K,
        .interrupt_priority = APP_IRQ_PRIORITY_LOWEST,
        .clear_bus_init     = true,
 	   .hold_bus_uninit    = true
@@ -69,7 +69,7 @@ void i2c_schedule(nrf_twi_mngr_transaction_t const * p_transaction) {
  *
  * @param p_transaction
  */
-void i2c_perform(nrf_drv_twi_config_t const *    p_config,
+uint32_t i2c_perform(nrf_drv_twi_config_t const *    p_config,
         nrf_twi_mngr_transfer_t const * p_transfers,
         uint8_t                         number_of_transfers,
         void                            (* user_function)(void)) {
@@ -80,7 +80,9 @@ void i2c_perform(nrf_drv_twi_config_t const *    p_config,
 			p_transfers,
 			number_of_transfers,
 			user_function);
+
 	APP_ERROR_CHECK(ret_val);
+	return ret_val;
 }
 
 

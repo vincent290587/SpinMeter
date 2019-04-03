@@ -49,8 +49,8 @@ extern "C" {
 #define SDA_PIN_NUMBER   NRF_GPIO_PIN_MAP(0, 13)
 #define SCL_PIN_NUMBER   NRF_GPIO_PIN_MAP(0, 11)
 
-#define GYR_INT1         NRF_GPIO_PIN_MAP(0, 31)
-#define GYR_INT2         NRF_GPIO_PIN_MAP(0, 29)
+#define GYR_INT1         NRF_GPIO_PIN_MAP(0, 30)
+#define GYR_INT2         NRF_GPIO_PIN_MAP(0, 31)
 
 #define LIS_INT1         NRF_GPIO_PIN_MAP(0, 15)
 #define LIS_INT2         NRF_GPIO_PIN_MAP(0, 17)

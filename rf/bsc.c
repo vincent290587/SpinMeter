@@ -47,7 +47,7 @@ BSC_SENS_CHANNEL_CONFIG_DEF(m_ant_bsc,
 BSC_SENS_PROFILE_CONFIG_DEF(m_ant_bsc,
                             true,
                             true,
-                            ANT_BSC_PAGE_5,
+							ANT_BSC_COMB_PAGE_0,
                             ant_bsc_evt_handler);
 
 static ant_bsc_profile_t  m_ant_bsc;    /**< Simulator used to simulate profile data. */
@@ -63,6 +63,8 @@ static void ant_bsc_evt_handler(ant_bsc_profile_t * p_profile, ant_bsc_evt_t eve
 {
 	LOG_DEBUG("BSC event %u", event);
 
+	W_SYSVIEW_RecordEnterISR();
+
 	switch (event)
 	{
 	case ANT_BSC_PAGE_0_UPDATED:
@@ -76,19 +78,26 @@ static void ant_bsc_evt_handler(ant_bsc_profile_t * p_profile, ant_bsc_evt_t eve
 	case ANT_BSC_PAGE_4_UPDATED:
 		/* fall through */
 	case ANT_BSC_PAGE_5_UPDATED:
+	{
 		LOG_INFO("BSC sending page 5");
 		/* Log computed value */
-		break;
+	} break;
 
 	case ANT_BSC_COMB_PAGE_0_UPDATED:
 	{
 		LOG_INFO("BSC sending combined page 0");
+
+		// TODO fill cadence
+		m_ant_bsc_simulator._cb.cadence_sim_val = 50;
+
 		ant_bsc_simulator_one_iteration(&m_ant_bsc_simulator);
 	} break;
 
 	default:
 		break;
 	}
+
+	W_SYSVIEW_RecordExitISR();
 }
 
 /**

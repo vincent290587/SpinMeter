@@ -28,7 +28,7 @@
 static struct bmg250_dev m_gyro;
 static struct bmg250_sensor_data m_gyro_data;
 
-static bool m_is_updated;
+static bool m_is_updated = false;
 
 static void _bmg_delay_ms(uint32_t period) {
 	nrf_delay_ms(period);
@@ -103,7 +103,7 @@ static void _bmg250_readout_cb(ret_code_t result, void * p_user_data) {
 
 	m_is_updated = true;
 
-	LOG_DEBUG("BMG250 read");
+	LOG_DEBUG("BMG250 read (%d)", m_gyro_data.z);
 
 	W_SYSVIEW_RecordExitISR();
 
@@ -156,7 +156,7 @@ void bmg250_wrapper_init(void) {
 
 	if (rslt == BMG250_OK) {
 		/* Selecting the ODR as 100Hz */
-		gyro_cfg.odr = BMG250_ODR_100HZ;
+		gyro_cfg.odr = BMG250_ODR_25HZ;
 		/* Selecting the bw as Normal mode */
 		gyro_cfg.bw = BMG250_BW_OSR2_MODE;
 		/* Selecting the range as 2000 Degrees/second */
@@ -174,13 +174,15 @@ void bmg250_wrapper_init(void) {
 	int_conf.int_channel = BMG250_INT_CHANNEL_1;
 	int_conf.int_type = BMG250_DATA_RDY_INT;
 	int_conf.int_pin_settg.output_en = BMG250_ENABLE;
-	int_conf.int_pin_settg.output_mode = BMG250_OPEN_DRAIN;
+	int_conf.int_pin_settg.output_mode = BMG250_PUSH_PULL;
 	int_conf.int_pin_settg.output_type = BMG250_ACTIVE_HIGH;
 	int_conf.int_pin_settg.edge_ctrl = BMG250_EDGE_TRIGGER;
 	int_conf.int_pin_settg.input_en = BMG250_DISABLE;
 
 	/* Set the desired configuration in the sensor */
 	rslt = bmg250_set_int_config(&int_conf, &m_gyro);
+
+	LOG_WARNING("BMG250 Init success (%u)", rslt);
 }
 
 bool bmg250_wrapper_is_updated(void) {

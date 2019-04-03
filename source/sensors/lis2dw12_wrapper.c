@@ -29,7 +29,7 @@
 
 static lis2dw12_ctx_t dev_ctx;
 static lis2dw12_reg_t int_route;
-static bool m_is_updated;
+static bool m_is_updated = false;
 static float acceleration_mg[3];
 
 static int32_t _lis_i2c_read(void *handle, uint8_t reg_addr, uint8_t *p_data, uint16_t length) {
@@ -39,9 +39,7 @@ static int32_t _lis_i2c_read(void *handle, uint8_t reg_addr, uint8_t *p_data, ui
 			I2C_READ_REG(LIS2DW12_I2C_ADD_L, &reg_addr, p_data, length)
 	};
 
-	i2c_perform(NULL, xfer, sizeof(xfer) / sizeof(xfer[0]), NULL);
-
-	return 0;
+	return i2c_perform(NULL, xfer, sizeof(xfer) / sizeof(xfer[0]), NULL);
 }
 
 static int32_t _lis_i2c_write(void *handle, uint8_t reg_addr, uint8_t *data, uint16_t length) {
@@ -60,9 +58,7 @@ static int32_t _lis_i2c_write(void *handle, uint8_t reg_addr, uint8_t *data, uin
 			I2C_WRITE(LIS2DW12_I2C_ADD_L, p_data, length+1)
 	};
 
-	i2c_perform(NULL, xfer, sizeof(xfer) / sizeof(xfer[0]), NULL);
-
-	return 0;
+	return i2c_perform(NULL, xfer, sizeof(xfer) / sizeof(xfer[0]), NULL);
 }
 
 static void _lis2dw12_readout_cb(ret_code_t result, void * p_user_data) {
@@ -193,6 +189,8 @@ void lis2dw12_wrapper_init(void)
 	APP_ERROR_CHECK(err_code);
 
 	nrfx_gpiote_in_event_enable(LIS_INT1, true);
+
+	LOG_ERROR("LIS2DW Init success");
 
 }
 

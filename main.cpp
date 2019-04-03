@@ -273,7 +273,7 @@ void wdt_event_handler(void)
  */
 static void buttons_leds_init(void)
 {
-	uint32_t err_code = bsp_init(BSP_INIT_BUTTONS, bsp_evt_handler);
+	uint32_t err_code = bsp_init(BSP_INIT_BUTTONS | BSP_INIT_LEDS, bsp_evt_handler);
 	APP_ERROR_CHECK(err_code);
 }
 
@@ -291,10 +291,16 @@ static void pins_init(void)
 	nrf_gpio_pin_clear(LIS_INT2);
 	nrf_gpio_cfg_output(LIS_INT2);
 
+	nrf_gpio_cfg_output(HV_EN);
+	nrf_gpio_pin_clear(HV_EN);
+
+	nrf_gpio_cfg_output(N_VCCINT_EN);
+	nrf_gpio_pin_clear(N_VCCINT_EN);
+
 }
 
 void wdt_reload() {
-	//	nrfx_wdt_channel_feed(m_channel_id);
+	nrfx_wdt_channel_feed(m_channel_id);
 }
 
 
@@ -327,12 +333,12 @@ int main(void)
 
 	// Initialize.
 	//Configure WDT.
-	//    nrfx_wdt_config_t wdt_config = NRFX_WDT_DEAFULT_CONFIG;
-	//    err_code = nrfx_wdt_init(&wdt_config, wdt_event_handler);
-	//    APP_ERROR_CHECK(err_code);
-	//    err_code = nrfx_wdt_channel_alloc(&m_channel_id);
-	//    APP_ERROR_CHECK(err_code);
-	//    nrfx_wdt_enable();
+	nrfx_wdt_config_t wdt_config = NRFX_WDT_DEAFULT_CONFIG;
+	err_code = nrfx_wdt_init(&wdt_config, wdt_event_handler);
+	APP_ERROR_CHECK(err_code);
+	err_code = nrfx_wdt_channel_alloc(&m_channel_id);
+	APP_ERROR_CHECK(err_code);
+	nrfx_wdt_enable();
 
 	log_init();
 
@@ -361,11 +367,6 @@ int main(void)
 		memset(&m_app_error.hf_desc, 0, sizeof(m_app_error.hf_desc));
 	}
 
-	// drivers
-	i2c_init();
-
-	nrf_delay_ms(1000);
-
 	err_code = nrf_pwr_mgmt_init();
 	APP_ERROR_CHECK(err_code);
 
@@ -374,6 +375,12 @@ int main(void)
 #endif
 
 	buttons_leds_init();
+	nrf_gpio_pin_set(LED_1);
+
+	// drivers
+	i2c_init();
+
+	nrf_delay_ms(200);
 
 	// init BLE + ANT
 #ifdef SOFTDEVICE_PRESENT
@@ -397,6 +404,8 @@ int main(void)
 
 	LOG_INFO("App init done");
 
+	nrf_gpio_pin_clear(LED_1);
+
 
 	for (;;) {
 
@@ -407,6 +416,10 @@ int main(void)
 		i2c_scheduling_tasks();
 
 		LOG_DEBUG("App run");
+
+		wdt_reload();
+
+		bsp_tasks();
 
     	//No more logs to process, go to sleep
 		sysview_task_idle();

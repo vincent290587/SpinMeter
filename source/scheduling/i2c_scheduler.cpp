@@ -24,6 +24,8 @@ static void _int1_handler(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action
 
 	W_SYSVIEW_RecordEnterISR();
 
+	nrf_gpio_pin_toggle(LED_1);
+
     // schedule sensor reading
 	bmg250_wrapper_schedule_sensor();
 
@@ -42,7 +44,7 @@ static void _i2c_scheduling_sensors_post_init(void) {
 
 	// configure GPIOTE
 	nrfx_gpiote_in_config_t in_config;
-	in_config.is_watcher = false;
+	in_config.is_watcher = true;
 	in_config.hi_accuracy = true;
 	in_config.skip_gpio_setup = false;
 	in_config.pull = NRF_GPIO_PIN_PULLDOWN;

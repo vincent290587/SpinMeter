@@ -11,6 +11,9 @@
 #include "segger_wrapper.h"
 
 void fdc1004_meas_trigger(void) {
+
+	FDC1004_read_raw_measurement(0, NULL);
+
 	// set trigger
 	sChannelTrigger trigger;
 	trigger.val = 0;
@@ -19,14 +22,14 @@ void fdc1004_meas_trigger(void) {
 
 	// enable meas on ch1
 	trigger.bitfield.ch1_m_en = 1;
-
 	FDC1004_trigger_measurement(&trigger);
 }
 
 void fdc1004_wrapper_init(void)
 {
+	uint8_t ret = FDC1004_init();
 	// init module
-	if (!FDC1004_init()) {
+	if (!ret) {
 
 		// configure measurement
 		sChannelMeasurement ch_meas;
@@ -37,8 +40,20 @@ void fdc1004_wrapper_init(void)
 
 		FDC1004_configure_differential_measurement(0, &ch_meas);
 
+		// set trigger
+		sChannelTrigger trigger;
+		trigger.val = 0;
+
+		trigger.bitfield.meas_rate = eConfRegRate400SPS;
+
+		// enable meas on ch1
+		trigger.bitfield.ch1_m_en = 1;
+		FDC1004_trigger_measurement(&trigger);
+
+		LOG_WARNING("FDC1004 Init success");
+
 	} else {
-		LOG_ERROR("FDC 1004 init problem");
+		LOG_ERROR("FDC 1004 init problem: %u", ret);
 	}
 }
 
