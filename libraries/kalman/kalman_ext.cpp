@@ -141,6 +141,9 @@ void kalman_ext_feed(sKalmanDescr *descr, sKalmanExtFeed *feed) {
 
 	if (!descr->is_init) {
 
+		// set C
+		descr->ker.matC.resize(0, 0);
+
 		descr->is_init = 1;
 
 	}
@@ -169,7 +172,7 @@ void kalman_ext_feed(sKalmanDescr *descr, sKalmanExtFeed *feed) {
 
 	// z - C*x_est
 	UDMatrix matI, innov;
-	matI = descr->ker.matC * descr->ker.matXmi;
+	matI = descr->ker_ext.matH * descr->ker.matXmi;
 	innov = feed->matZ - matI;
 
 	// update estimate
@@ -182,7 +185,7 @@ void kalman_ext_feed(sKalmanDescr *descr, sKalmanExtFeed *feed) {
 	UDMatrix matTmp;
 	matKI.resize(descr->ker.ker_dim, descr->ker.ker_dim);
 	matKI.unity();
-	matTmp = descr->ker.matK * descr->ker.matC;
+	matTmp = descr->ker.matK * descr->ker_ext.matH;
 	matKI = matKI - matTmp;
 	descr->ker.matP = matKI * descr->ker.matPmi;
 
