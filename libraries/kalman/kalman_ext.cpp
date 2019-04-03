@@ -170,7 +170,7 @@ void kalman_ext_feed(sKalmanDescr *descr, sKalmanExtFeed *feed) {
 	matHpi = matHp.invert();
 	descr->ker.matK = descr->ker.matK * matHpi;
 
-	// z - C*x_est
+	// z - H * x_est
 	UDMatrix matI, innov;
 	matI = descr->ker_ext.matH * descr->ker.matXmi;
 	innov = feed->matZ - matI;

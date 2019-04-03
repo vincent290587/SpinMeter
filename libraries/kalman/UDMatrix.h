@@ -24,12 +24,12 @@ public:
 
 	udm_type_t get(unsigned x, unsigned y);
 	void set(unsigned x, unsigned y, udm_type_t val);
-	void unity(float res = 1.);
-	void ones(float res = 1.);
+	void unity(udm_type_t res = (udm_type_t)1);
+	void ones(udm_type_t res = (udm_type_t)1);
 	void zeros(void);
 	void print(void);
-	void div(float val);
-	void mul(float val);
+	void div(udm_type_t val);
+	void mul(udm_type_t val);
 	void resize(unsigned _rowSize, unsigned _colSize);
 
 	UDMatrix operator+(UDMatrix &s_mat);

@@ -106,7 +106,9 @@ UDMatrix UDMatrix::transpose() {
 	return res;
 }
 
-void UDMatrix::div(float val) {
+void UDMatrix::div(udm_type_t val) {
+
+	ASSERT(val != (udm_type_t)0);
 
 	for (unsigned i=0; i< this->m_rowSize; i++) {
 		for (unsigned j=0; j< this->m_colSize; j++) {
@@ -118,7 +120,7 @@ void UDMatrix::div(float val) {
 
 }
 
-void UDMatrix::mul(float val) {
+void UDMatrix::mul(udm_type_t val) {
 
 	for (unsigned i=0; i< this->m_rowSize; i++) {
 		for (unsigned j=0; j< this->m_colSize; j++) {
@@ -153,7 +155,7 @@ UDMatrix UDMatrix::invert() {
 
 	ASSERT(this->m_colSize == this->m_rowSize);
 
-	float temp;
+	udm_type_t temp;
 	const unsigned order = this->m_rowSize;
 	UDMatrix res(this->m_rowSize, this->m_rowSize);
 
@@ -171,7 +173,7 @@ UDMatrix UDMatrix::invert() {
 			if (j < order) t_mat.m_data[i][j] = this->m_data[i][j];
 
 			// Add '1' at the diagonal places of
-			// the matrix to create a identity matirx
+			// the matrix to create a identity matrix
 			if (j == (i + order))
 				t_mat.m_data[i][j] = 1;
 		}
@@ -214,7 +216,7 @@ UDMatrix UDMatrix::invert() {
 	for (unsigned i = 0; i < order; i++) {
 
 		temp = t_mat.m_data[i][i];
-		if (temp == 0.0F) {
+		if (temp == (udm_type_t)0) {
 			LOG_ERROR("Not inversible");
 			temp = 9999999;
 		}
@@ -245,19 +247,19 @@ udm_type_t UDMatrix::get(unsigned x, unsigned y) {
 
 }
 
-void UDMatrix::unity(float res) {
+void UDMatrix::unity(udm_type_t res) {
 
 	for (unsigned i=0; i< this->m_rowSize; i++) {
 		for (unsigned j=0; j< this->m_colSize; j++) {
 
-			this->m_data[i][j] = i == j ? res:0;
+			this->m_data[i][j] = i == j ? res:(udm_type_t)0;
 
 		}
 	}
 
 }
 
-void UDMatrix::ones(float val) {
+void UDMatrix::ones(udm_type_t val) {
 
 	for (unsigned i=0; i< this->m_rowSize; i++) {
 		for (unsigned j=0; j< this->m_colSize; j++) {
@@ -271,7 +273,7 @@ void UDMatrix::ones(float val) {
 
 void UDMatrix::zeros(void) {
 
-	this->ones(0.0F);
+	this->ones((udm_type_t)0);
 
 }
 
