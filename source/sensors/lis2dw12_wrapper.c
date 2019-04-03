@@ -127,6 +127,9 @@ void lis2dw12_wrapper_init(void)
 {
 	uint8_t whoamI, rst;
 
+	// clear trigger
+	gpio_clear(LIS_INT2);
+
 	dev_ctx.write_reg = _lis_i2c_write;
 	dev_ctx.read_reg = _lis_i2c_read;
 	dev_ctx.handle = NULL;
@@ -182,8 +185,12 @@ void lis2dw12_wrapper_init(void)
 	int_route.ctrl4_int1_pad_ctrl.int1_drdy = PROPERTY_ENABLE;
 	lis2dw12_pin_int1_route_set(&dev_ctx, &int_route.ctrl4_int1_pad_ctrl);
 
-	nrfx_gpiote_in_config_t in_config = NRFX_GPIOTE_CONFIG_IN_SENSE_LOTOHI(true);
+	nrfx_gpiote_in_config_t in_config;
+	in_config.is_watcher = true;
+	in_config.hi_accuracy = true;
+	in_config.skip_gpio_setup = false;
 	in_config.pull = NRF_GPIO_PIN_PULLDOWN;
+	in_config.sense = NRF_GPIOTE_POLARITY_LOTOHI;
 
 	ret_code_t err_code = nrfx_gpiote_in_init(LIS_INT1, &in_config, _int1_handler);
 	APP_ERROR_CHECK(err_code);
@@ -253,7 +260,7 @@ void lis2dw12_wrapper_set_wake(void)
 	lis2dw12_wkup_threshold_set(&dev_ctx, 2);
 
 	/*
-	 * Enable interrupt generation on Wake-Up INT2 pin
+	 * Enable interrupt generation on Wake-Up INT1 pin
 	 *
 	 */
 	lis2dw12_pin_int1_route_get(&dev_ctx, &int_route.ctrl4_int1_pad_ctrl);
@@ -263,6 +270,8 @@ void lis2dw12_wrapper_set_wake(void)
 }
 
 bool lis2dw12_wrapper_is_updated(void) {
+	// clear trigger
+	gpio_clear(LIS_INT2);
 	return m_is_updated;
 }
 
