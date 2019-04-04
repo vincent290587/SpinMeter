@@ -21,6 +21,7 @@
 extern "C" {
 #endif
 
+
 void bsc_init(void);
 
 void ant_evt_bsc (ant_evt_t * p_ant_evt);
@@ -28,6 +29,8 @@ void ant_evt_bsc (ant_evt_t * p_ant_evt);
 void bsc_profile_setup(void);
 
 void bsc_profile_start(void);
+
+void bsc_profile_stop(void);
 
 
 #ifdef __cplusplus

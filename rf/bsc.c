@@ -178,5 +178,16 @@ void bsc_profile_start(void) {
     APP_ERROR_CHECK(err_code);
 }
 
+/**
+ *
+ */
+void bsc_profile_stop(void) {
+
+	ret_code_t err_code;
+
+    err_code = sd_ant_channel_open(m_ant_bsc.channel_number);
+    APP_ERROR_CHECK(err_code);
+}
+
 
 #endif

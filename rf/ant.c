@@ -103,6 +103,17 @@ void ant_setup_start(void)
 /**
  *
  */
+void ant_setup_stop(void)
+{
+	// Open the ANT channels
+	bsc_profile_stop();
+
+	LOG_INFO("ANT started");
+}
+
+/**
+ *
+ */
 void ant_tasks(void) {
 
 }

@@ -32,6 +32,10 @@
 #include "segger_wrapper.h"
 #include "WString.h"
 
+#ifdef SOFTDEVICE_PRESENT
+#include "nrf_sdh.h"
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -214,9 +218,10 @@ void bsp_tasks(void)
 	switch (m_bsp_evt)
 	{
 	case BSP_EVENT_KEY_0:
-		// TODO process
-		nrf_pwr_mgmt_shutdown(NRF_PWR_MGMT_SHUTDOWN_STAY_IN_SYSOFF);
-		break;
+	{
+		LOG_WARNING("Going to DFU !");
+		nrf_pwr_mgmt_shutdown(NRF_PWR_MGMT_SHUTDOWN_GOTO_DFU);
+	} break;
 	default:
 		return; // no implementation needed
 	}
@@ -237,19 +242,52 @@ void bsp_tasks(void)
  */
 static bool app_shutdown_handler(nrf_pwr_mgmt_evt_t event)
 {
+	ret_code_t err_code;
+
 	if (NRF_PWR_MGMT_EVT_PREPARE_SYSOFF == event) {
 
 		nrf_gpio_pin_clear(HV_EN);
 		nrf_gpio_pin_set(N_VCCINT_EN);
 
+#if defined (ANT_STACK_SUPPORT_REQD)
+	    ant_setup_stop();
+#endif
+#ifdef SOFTDEVICE_PRESENT
+	    //Disable SoftDevice. It is required to be able to write to GPREGRET2 register (SoftDevice API blocks it).
+	    //GPREGRET2 register holds the information about skipping CRC check on next boot.
+	    err_code = nrf_sdh_disable_request();
+	    APP_ERROR_CHECK(err_code);
+#endif
+
+		// Device ready to enter
+		err_code = app_timer_stop_all();
+		APP_ERROR_CHECK(err_code);
+
 		return true;
 	} else if (NRF_PWR_MGMT_EVT_PREPARE_DFU == event) {
 
-#if 0
-		// TODO add flag
-		ret_code_t err_code = sd_power_gpregret_set(0, BOOTLOADER_DFU_START);
-		APP_ERROR_CHECK(err_code);
+		nrf_gpio_pin_clear(HV_EN);
+		nrf_gpio_pin_set(N_VCCINT_EN);
+
+#if defined (ANT_STACK_SUPPORT_REQD)
+	    ant_setup_stop();
 #endif
+#ifdef SOFTDEVICE_PRESENT
+	    //Disable SoftDevice. It is required to be able to write to GPREGRET2 register (SoftDevice API blocks it).
+	    //GPREGRET2 register holds the information about skipping CRC check on next boot.
+	    err_code = nrf_sdh_disable_request();
+	    APP_ERROR_CHECK(err_code);
+#endif
+
+		err_code = app_timer_stop_all();
+		APP_ERROR_CHECK(err_code);
+
+		// add GPREGRET flag
+		err_code = sd_power_gpregret_clr(0, 0xffffffff);
+	    VERIFY_SUCCESS(err_code);
+
+	    err_code = sd_power_gpregret_set(0, BOOTLOADER_DFU_START);
+	    VERIFY_SUCCESS(err_code);
 
 		LOG_INFO("Power management allowed to reset to DFU mode.");
 
@@ -315,7 +353,6 @@ void wdt_reload() {
  *
  * @details Initializes the SoftDevice
  */
-#include "nrf_sdh.h"
 static void sdh_init(void)
 {
 	ret_code_t err_code;

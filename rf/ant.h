@@ -22,6 +22,8 @@ void ant_setup_init(void);
 
 void ant_setup_start(void);
 
+void ant_setup_stop(void);
+
 void ant_timers_init(void);
 
 
