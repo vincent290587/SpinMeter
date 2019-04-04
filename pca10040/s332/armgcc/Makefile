@@ -148,6 +148,12 @@ flash_softdevice:
 	nrfjprog --program $(SDK_ROOT)/$(SOFTDEVICE) -f nrf52 --sectorerase 
 #	nrfjprog --reset -f nrf52
 
+dfu:
+	nrfutil --verbose pkg generate --hw-version 52 --sd-req 0xba --application-version 1 --application $(OUTPUT_DIRECTORY)/$(TARGETS).hex --key-file $(SDK_ROOT)/../vault/priv.pem SpinMeter.zip
+	nrfutil pkg display SpinMeter.zip
+	nrfutil dfu ant -pkg SpinMeter.zip -p $(COM_PORT)
+
+
 SDK_CONFIG_FILE := ../config/sdk_config.h
 SDK_CONFIG_FILE_ANT := ../config/sdk_config_ant.h
 CMSIS_CONFIG_TOOL := $(SDK_ROOT)/external_tools/cmsisconfig/CMSIS_Configuration_Wizard.jar
