@@ -11,6 +11,7 @@
 #include <stdio.h>
 
 #include "Model.h"
+#include "data_dispatcher.h"
 #include "segger_wrapper.h"
 
 #include "ant.h"
@@ -87,8 +88,22 @@ static void ant_bsc_evt_handler(ant_bsc_profile_t * p_profile, ant_bsc_evt_t eve
 	{
 		LOG_INFO("BSC sending combined page 0");
 
-		// TODO fill cadence
-		m_ant_bsc_simulator._cb.cadence_sim_val = 50;
+		m_ant_bsc_simulator._cb.auto_change = false;
+
+		// speed
+		m_ant_bsc_simulator._cb.sensorsim_s_state.current_val = 0;
+
+		// cadence
+		uint32_t cadence = 0;
+		data_dispatcher_get_cadence(&cadence);
+		m_ant_bsc_simulator._cb.sensorsim_c_state.current_val = cadence;
+
+	    // battery voltage
+		uint32_t batt_mv = 0;
+		data_dispatcher_get_batt_volt(&batt_mv);
+		m_ant_bsc_simulator.p_profile->BSC_PROFILE_coarse_bat_volt = batt_mv / 1000;
+	    m_ant_bsc_simulator.p_profile->BSC_PROFILE_fract_bat_volt  = batt_mv % 1000;
+	    m_ant_bsc_simulator.p_profile->BSC_PROFILE_bat_status      = BSC_BAT_STATUS_GOOD;
 
 		ant_bsc_simulator_one_iteration(&m_ant_bsc_simulator);
 	} break;
@@ -109,6 +124,7 @@ void ant_evt_bsc (ant_evt_t * p_ant_evt)
 	{
 	case EVENT_TX:
 		ant_bsc_sens_evt_handler(p_ant_evt, &m_ant_bsc);
+		break;
 
 	default:
 		break;

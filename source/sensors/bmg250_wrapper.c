@@ -11,6 +11,7 @@
 #include "helper.h"
 #include "bmg250.h"
 #include "nrf_twi_mngr.h"
+#include "data_dispatcher.h"
 #include "segger_wrapper.h"
 
 
@@ -27,6 +28,8 @@
 
 static struct bmg250_dev m_gyro;
 static struct bmg250_sensor_data m_gyro_data;
+
+static int32_t m_sensitivity = 164;
 
 static bool m_is_updated = false;
 
@@ -155,12 +158,14 @@ void bmg250_wrapper_init(void) {
 	rslt = bmg250_get_sensor_settings(&gyro_cfg, &m_gyro);
 
 	if (rslt == BMG250_OK) {
-		/* Selecting the ODR as 100Hz */
+		/* Selecting the ODR */
 		gyro_cfg.odr = BMG250_ODR_25HZ;
 		/* Selecting the bw as Normal mode */
 		gyro_cfg.bw = BMG250_BW_OSR2_MODE;
 		/* Selecting the range as 2000 Degrees/second */
 		gyro_cfg.range = BMG250_RANGE_2000_DPS;
+
+		m_sensitivity = 164;
 	} else {
 		LOG_ERROR("Could not get sensor settings");
 	}
@@ -193,5 +198,8 @@ void bmg250_wrapper_sensor_refresh(void) {
 
 	if (!m_is_updated) return;
 	m_is_updated = false;
+
+	int32_t val = (m_gyro_data.z * 100) / m_sensitivity;
+	data_dispatcher_feed_gyro(val);
 
 }
