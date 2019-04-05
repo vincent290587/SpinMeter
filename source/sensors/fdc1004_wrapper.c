@@ -7,8 +7,6 @@
 
 #include <stdbool.h>
 #include "FDC1004.h"
-#include "nrf_gpio.h"
-#include "boards.h"
 #include "nrf_delay.h"
 #include "fdc1004_wrapper.h"
 #include "segger_wrapper.h"
@@ -84,11 +82,15 @@ void fdc1004_wrapper_sensor_tasks(void) {
 	if (FDC1004_is_updated()) {
 
 		// convert
-		float delta_cap;
-		FDC1004_read_measurement(0, &delta_cap);
+		int32_t delta_cap;
+		if (!FDC1004_read_measurement(0, &delta_cap)) {
 
-		// TODO process
-		LOG_WARNING("Raw val in fF: %d", (int32_t)(delta_cap * 1000));
+			// TODO process
+			LOG_WARNING("Raw val in fF: %d", (int32_t)(delta_cap / 1000));
+
+		} else {
+			LOG_ERROR("FDC1004 conversion error");
+		}
 
 		FDC1004_clear_updated();
 	}

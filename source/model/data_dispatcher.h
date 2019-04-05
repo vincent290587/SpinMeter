@@ -16,7 +16,7 @@ extern "C" {
 #endif
 
 
-void data_dispatcher_feed_gyro(int32_t ddeg_s);
+void data_dispatcher_feed_gyro(float mdeg_s);
 
 bool data_dispatcher_get_batt_volt(uint32_t *batt_mv);
 

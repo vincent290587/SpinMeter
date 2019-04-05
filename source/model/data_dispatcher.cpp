@@ -6,33 +6,33 @@
  */
 
 
-#include "nrf_gpio.h"
-#include "boards.h"
+#include "gpio.h"
 #include "data_dispatcher.h"
 #include "math_wrapper.h"
 #include "segger_wrapper.h"
 
 
-static float m_turns = 0;
+static float m_angle = 0;
 static uint32_t m_cadence = 0;
 
-void data_dispatcher_feed_gyro(int32_t ddeg_s) {
+void data_dispatcher_feed_gyro(float mdeg_s) {
 
-	m_cadence = abs(ddeg_s) * 60 / 1800;
+	m_cadence = (uint32_t)(fabsf(mdeg_s / 1000.) * 60. / 360.);
 
-	int val = abs(ddeg_s) * 10 / 25;
-	m_turns += (float)val;
+	// integrate angular speed over time (25Hz)
+	float val = fabsf(mdeg_s / 1000.) / 25.;
+	m_angle += val;
 
-	if (m_turns > 360.) {
-		m_turns = 0.0;
+	if (m_angle > 360.) {
+		m_angle = 0.0;
 
 		LOG_WARNING("Full turn !");
 
-		nrf_gpio_pin_set(LED_1);
+		gpio_set(LED_1);
 
 	} else {
 
-		nrf_gpio_pin_clear(LED_1);
+		gpio_clear(LED_1);
 
 	}
 
