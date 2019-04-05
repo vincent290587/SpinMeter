@@ -24,8 +24,6 @@ static void _int1_handler(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action
 
 	W_SYSVIEW_RecordEnterISR();
 
-	nrf_gpio_pin_toggle(LED_1);
-
     // schedule sensor reading
 	bmg250_wrapper_schedule_sensor();
 
@@ -63,11 +61,12 @@ static void _i2c_scheduling_sensors_post_init(void) {
 static void _i2c_scheduling_sensors_init() {
 
 	// Init sensors configuration
-	bmg250_wrapper_init();
+
+	fdc1004_wrapper_init();
 
 	lis2dw12_wrapper_init();
 
-	fdc1004_wrapper_init();
+	bmg250_wrapper_init();
 }
 
 /**

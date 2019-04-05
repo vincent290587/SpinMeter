@@ -80,7 +80,7 @@ static void _lis2dw12_readout_cb(ret_code_t result, void * p_user_data) {
 
 	m_is_updated = true;
 
-	LOG_DEBUG("LIS2DW read");
+	LOG_WARNING("LIS2DW read");
 
 	W_SYSVIEW_RecordExitISR();
 

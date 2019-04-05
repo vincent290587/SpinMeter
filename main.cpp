@@ -335,8 +335,7 @@ static void pins_init(void)
 	nrf_gpio_pin_clear(LIS_INT2);
 	nrf_gpio_cfg_output(LIS_INT2);
 
-	nrf_gpio_cfg_output(HV_EN);
-	nrf_gpio_pin_clear(HV_EN);
+	nrf_gpio_cfg_input(HV_EN, NRF_GPIO_PIN_PULLUP);
 
 	nrf_gpio_cfg_output(N_VCCINT_EN);
 	nrf_gpio_pin_clear(N_VCCINT_EN);

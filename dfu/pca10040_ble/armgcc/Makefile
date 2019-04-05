@@ -1,11 +1,11 @@
-PROJECT_NAME     := secure_bootloader_ble_s132_pca10040
-TARGETS          := nrf52832_xxaa_s132
-OUTPUT_DIRECTORY := _build
+PROJECT_NAME     := secure_bootloader_ble_s332_pca10040
+TARGETS          := nrf52832_xxaa_s332
 
-SDK_ROOT := ../../../../..
+include Makefile.local
+
 PROJ_DIR := ../..
 
-$(OUTPUT_DIRECTORY)/nrf52832_xxaa_s132.out: \
+$(OUTPUT_DIRECTORY)/nrf52832_xxaa_s332.out: \
   LINKER_SCRIPT  := secure_bootloader_gcc_nrf52.ld
 
 # Source files common to all targets
@@ -45,7 +45,7 @@ SRC_FILES += \
   $(SDK_ROOT)/components/libraries/crypto/nrf_crypto_hash.c \
   $(SDK_ROOT)/components/libraries/crypto/nrf_crypto_init.c \
   $(SDK_ROOT)/components/libraries/crypto/nrf_crypto_shared.c \
-  $(PROJ_DIR)/../dfu_public_key.c \
+  $(PROJ_DIR)/dfu_public_key.c \
   $(PROJ_DIR)/main.c \
   $(SDK_ROOT)/components/ble/common/ble_srv_common.c \
   $(SDK_ROOT)/components/libraries/bootloader/nrf_bootloader.c \
@@ -88,7 +88,7 @@ SRC_FILES += \
 # Include folders common to all targets
 INC_FOLDERS += \
   $(SDK_ROOT)/components/libraries/crypto/backend/micro_ecc \
-  $(SDK_ROOT)/components/softdevice/s132/headers \
+  $(SDK_ROOT)/components/softdevice/s332/headers \
   $(SDK_ROOT)/components/libraries/memobj \
   $(SDK_ROOT)/components/libraries/sha256 \
   $(SDK_ROOT)/components/libraries/crc32 \
@@ -103,7 +103,7 @@ INC_FOLDERS += \
   $(SDK_ROOT)/components/libraries/atomic \
   $(SDK_ROOT)/integration/nrfx \
   $(SDK_ROOT)/components/libraries/crypto/backend/cc310_bl \
-  $(SDK_ROOT)/components/softdevice/s132/headers/nrf52 \
+  $(SDK_ROOT)/components/softdevice/s332/headers/nrf52 \
   $(SDK_ROOT)/components/libraries/log/src \
   $(SDK_ROOT)/components/libraries/bootloader/dfu \
   $(SDK_ROOT)/components/ble/common \
@@ -121,6 +121,7 @@ INC_FOLDERS += \
   $(SDK_ROOT)/external/fprintf \
   $(SDK_ROOT)/components/libraries/crypto \
   ../config \
+  ../../.. \
   $(SDK_ROOT)/components/libraries/crypto/backend/optiga \
   $(SDK_ROOT)/components/libraries/scheduler \
   $(SDK_ROOT)/modules/nrfx/hal \
@@ -150,8 +151,8 @@ OPT = -Os -g3
 # C flags common to all targets
 CFLAGS += $(OPT)
 CFLAGS += -DBLE_STACK_SUPPORT_REQD
-CFLAGS += -DBOARD_PCA10040
-CFLAGS += -DCONFIG_GPIO_AS_PINRESET
+CFLAGS += -DBOARD_CUSTOM
+CFLAGS += -DUSE_APP_CONFIG
 CFLAGS += -DFLOAT_ABI_HARD
 CFLAGS += -DNRF52
 CFLAGS += -DNRF52832_XXAA
@@ -159,7 +160,7 @@ CFLAGS += -DNRF52_PAN_74
 CFLAGS += -DNRF_DFU_SETTINGS_VERSION=2
 CFLAGS += -DNRF_DFU_SVCI_ENABLED
 CFLAGS += -DNRF_SD_BLE_API_VERSION=6
-CFLAGS += -DS132
+CFLAGS += -DS332
 CFLAGS += -DSOFTDEVICE_PRESENT
 CFLAGS += -DSVC_INTERFACE_CALL_AS_NORMAL_FUNCTION
 CFLAGS += -DuECC_ENABLE_VLI_API=0
@@ -184,8 +185,8 @@ ASMFLAGS += -mcpu=cortex-m4
 ASMFLAGS += -mthumb -mabi=aapcs
 ASMFLAGS += -mfloat-abi=hard -mfpu=fpv4-sp-d16
 ASMFLAGS += -DBLE_STACK_SUPPORT_REQD
-ASMFLAGS += -DBOARD_PCA10040
-ASMFLAGS += -DCONFIG_GPIO_AS_PINRESET
+ASMFLAGS += -DBOARD_CUSTOM
+ASMFLAGS += -DUSE_APP_CONFIG
 ASMFLAGS += -DFLOAT_ABI_HARD
 ASMFLAGS += -DNRF52
 ASMFLAGS += -DNRF52832_XXAA
@@ -193,7 +194,7 @@ ASMFLAGS += -DNRF52_PAN_74
 ASMFLAGS += -DNRF_DFU_SETTINGS_VERSION=2
 ASMFLAGS += -DNRF_DFU_SVCI_ENABLED
 ASMFLAGS += -DNRF_SD_BLE_API_VERSION=6
-ASMFLAGS += -DS132
+ASMFLAGS += -DS332
 ASMFLAGS += -DSOFTDEVICE_PRESENT
 ASMFLAGS += -DSVC_INTERFACE_CALL_AS_NORMAL_FUNCTION
 ASMFLAGS += -DuECC_ENABLE_VLI_API=0
@@ -212,8 +213,8 @@ LDFLAGS += -Wl,--gc-sections
 # use newlib in nano version
 LDFLAGS += --specs=nano.specs
 
-nrf52832_xxaa_s132: CFLAGS += -D__HEAP_SIZE=0
-nrf52832_xxaa_s132: ASMFLAGS += -D__HEAP_SIZE=0
+nrf52832_xxaa_s332: CFLAGS += -D__HEAP_SIZE=0
+nrf52832_xxaa_s332: ASMFLAGS += -D__HEAP_SIZE=0
 
 # Add standard libraries at the very end of the linker input, after all objects
 # that may need symbols provided by these libraries.
@@ -223,12 +224,12 @@ LIB_FILES += -lc -lnosys -lm
 .PHONY: default help
 
 # Default target - first one defined
-default: nrf52832_xxaa_s132
+default: nrf52832_xxaa_s332
 
 # Print all targets that can be built
 help:
 	@echo following targets are available:
-	@echo		nrf52832_xxaa_s132
+	@echo		nrf52832_xxaa_s332
 	@echo		flash_softdevice
 	@echo		sdk_config - starting external tool for editing sdk_config.h
 	@echo		flash      - flashing binary
@@ -244,14 +245,14 @@ $(foreach target, $(TARGETS), $(call define_target, $(target)))
 
 # Flash the program
 flash: default
-	@echo Flashing: $(OUTPUT_DIRECTORY)/nrf52832_xxaa_s132.hex
-	nrfjprog -f nrf52 --program $(OUTPUT_DIRECTORY)/nrf52832_xxaa_s132.hex --sectorerase
+	@echo Flashing: $(OUTPUT_DIRECTORY)/nrf52832_xxaa_s332.hex
+	nrfjprog -f nrf52 --program $(OUTPUT_DIRECTORY)/nrf52832_xxaa_s332.hex --sectorerase
 	nrfjprog -f nrf52 --reset
 
 # Flash softdevice
 flash_softdevice:
-	@echo Flashing: s132_nrf52_6.1.1_softdevice.hex
-	nrfjprog -f nrf52 --program $(SDK_ROOT)/components/softdevice/s132/hex/s132_nrf52_6.1.1_softdevice.hex --sectorerase
+	@echo Flashing: s332_nrf52_6.1.1_softdevice.hex
+	nrfjprog -f nrf52 --program $(SDK_ROOT)/components/softdevice/s332/hex/ANT_s332_nrf52832_6.1.1.hex --sectorerase
 	nrfjprog -f nrf52 --reset
 
 erase:
