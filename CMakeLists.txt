@@ -56,6 +56,7 @@ set(SRCS
     source/sensors/fram.c
 	source/model/PowerZone.cpp
 	source/model/UserSettings.cpp
+	source/model/data_dispatcher.cpp
     )
     
 set(HEADERS

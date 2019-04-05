@@ -92,8 +92,6 @@ bool test_kalman_ext(void) {
 
 	LOG_INFO("Simulated pos: %f", val);
 
-	exit(0);
-
 	return true;
 }
 

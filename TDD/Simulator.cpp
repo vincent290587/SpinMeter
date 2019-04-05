@@ -18,25 +18,11 @@
  * Definitions
  ******************************************************************************/
 
-/* buffer size (in byte) for read/write operations */
-#define BUFFER_SIZE (128U)
 
 /*******************************************************************************
  * Variables
  ******************************************************************************/
 
-#ifdef LS027_GUI
-#define NEW_POINT_PERIOD_MS       400
-#else
-#define NEW_POINT_PERIOD_MS       50
-#endif
-
-static uint32_t last_point_ms = 0;
-static uint32_t nb_gps_loc = 0;
-
-static void simulator_modes(void) {
-
-}
 
 void simulator_init(void) {
 
@@ -58,6 +44,6 @@ void simulator_tasks(void) {
 		return;
 	}
 
-	if (millis() - last_point_ms < NEW_POINT_PERIOD_MS) return;
+	data_dispatcher_feed_gyro(360000.);
 
 }

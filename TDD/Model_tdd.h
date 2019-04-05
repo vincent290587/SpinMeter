@@ -11,6 +11,7 @@
 #include <stdbool.h>
 #include "parameters.h"
 #include "g_structs.h"
+#include "data_dispatcher.h"
 #include "segger_wrapper.h"
 #include "task_manager_wrapper_tdd.h"
 

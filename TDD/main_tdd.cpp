@@ -176,6 +176,8 @@ int main(void)
 		message += String(m_app_error.hf_desc.stck.pc);
 		message += " in void ";
 		message += m_app_error.void_id;
+		message += " file ";
+		message += m_app_error.err_desc._buffer;
 		LOG_ERROR(message.c_str());
 
 		memset(&m_app_error.hf_desc, 0, sizeof(m_app_error.hf_desc));

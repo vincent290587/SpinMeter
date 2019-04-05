@@ -8,7 +8,6 @@
 #include <unistd.h>
 #include "Model.h"
 #include "Simulator.h"
-#include "gpio.h"
 #include "segger_wrapper.h"
 
 
@@ -33,16 +32,12 @@ void model_dispatch_sensors_update(void) {
  */
 void perform_system_tasks(void) {
 
-	btn_task();
-
 }
 
 /**
  *
  */
 void perform_system_tasks_light(void) {
-
-	btn_task();
 
 }
 
@@ -54,7 +49,7 @@ void idle_task(void * p_context)
 {
     for(;;)
     {
-    	sleep(5);
+    	sleep(40);
 
 		simulator_tasks();
 
@@ -85,8 +80,9 @@ void peripherals_task(void * p_context)
 	for(;;)
 	{
 
+    	sleep(5);
 
-		events_wait(TASK_EVENT_PERIPH_TRIGGER);
+    	task_yield();
 	}
 }
 
