@@ -52,6 +52,8 @@ bool check_memory_exception(void);
 
 void wdt_reload(void);
 
+void app_shutdown(void);
+
 void bsp_tasks(void);
 
 void backlighting_tasks(void);

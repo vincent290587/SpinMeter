@@ -7,6 +7,7 @@
 
 
 #include "gpio.h"
+#include "Model.h"
 #include "data_dispatcher.h"
 #include "math_wrapper.h"
 #include "segger_wrapper.h"
@@ -18,12 +19,29 @@
 static float m_angle = 0;
 static uint32_t m_cadence = 0;
 
+static uint32_t m_static_nb = 0;
+
+static void _check_is_moving(float mdeg_s) {
+
+	if (fabsf(mdeg_s) < 500 &&
+			m_static_nb++ > 2 * 60 * 25) {
+		LOG_WARNING("Inactivity timeout: going to shutdown");
+		app_shutdown();
+		m_static_nb = 0;
+	} else {
+		m_static_nb = 0;
+	}
+
+}
+
 void data_dispatcher_feed_gyro(float mdeg_s) {
 
 	if (!isnormal(mdeg_s)) {
 		LOG_ERROR("Illegal float");
 		return;
 	}
+
+	_check_is_moving(mdeg_s);
 
 	m_cadence = (uint32_t)(fabsf(mdeg_s / 1000.) * 60. / 360.);
 
@@ -45,7 +63,12 @@ void data_dispatcher_feed_gyro(float mdeg_s) {
 	}
 
 #ifdef BLE_STACK_SUPPORT_REQD
-	ble_nus_log_cadence(m_cadence, 0);
+	// log cadence through BLE every second
+	static int nb_ind = 25;
+	if (nb_ind-- == 0) {
+		ble_nus_log_cadence(m_cadence, 0);
+		nb_ind = 25;
+	}
 #endif
 }
 

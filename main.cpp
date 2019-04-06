@@ -344,8 +344,12 @@ static void pins_init(void)
 
 }
 
-void wdt_reload() {
+void wdt_reload(void) {
 	nrfx_wdt_channel_feed(m_channel_id);
+}
+
+void app_shutdown(void) {
+	nrf_pwr_mgmt_shutdown(NRF_PWR_MGMT_SHUTDOWN_STAY_IN_SYSOFF);
 }
 
 
