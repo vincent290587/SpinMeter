@@ -135,7 +135,7 @@ void bmg250_wrapper_schedule_sensor(void) {
 
 void bmg250_wrapper_init(void) {
 
-	int8_t rslt = BMG250_OK;
+	int8_t rslt;
 
 	/* Sensor interface over I2C */
 	m_gyro.dev_id = BMG250_I2C_ADDR;

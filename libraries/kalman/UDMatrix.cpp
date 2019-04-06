@@ -231,8 +231,8 @@ UDMatrix UDMatrix::invert() {
 
 void UDMatrix::set(unsigned x, unsigned y, udm_type_t val) {
 
-	ASSERT(x >= 0 && x < m_rowSize);
-	ASSERT(y >= 0 && y < m_colSize);
+	ASSERT(x < m_rowSize);
+	ASSERT(y < m_colSize);
 
 	this->m_data[x][y] = val;
 
@@ -240,8 +240,8 @@ void UDMatrix::set(unsigned x, unsigned y, udm_type_t val) {
 
 udm_type_t UDMatrix::get(unsigned x, unsigned y) {
 
-	ASSERT(x >= 0 && x < m_rowSize);
-	ASSERT(y >= 0 && y < m_colSize);
+	ASSERT(x < m_rowSize);
+	ASSERT(y < m_colSize);
 
 	return this->m_data[x][y];
 
