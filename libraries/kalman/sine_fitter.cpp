@@ -162,8 +162,8 @@ void sine_fitter_compute(float *dataz, float omega, float sampling,
 
 	for(int i=0;i < numOfData;i++)
 	{
-	  datax[i] = cos(omega * sampling * i);
-	  datay[i] = sin(omega * sampling * i);
+	  datax[i] = cosf(omega * sampling * i);
+	  datay[i] = sinf(omega * sampling * i);
 	}
 
 	if (_fitter_compute(datax, datay, dataz,

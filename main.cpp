@@ -148,7 +148,7 @@ extern "C" void app_error_fault_handler(uint32_t id, uint32_t pc, uint32_t info)
 		error_info_t * p_info = (error_info_t *)info;
 		snprintf(m_app_error.err_desc._buffer, sizeof(m_app_error.err_desc._buffer),
 				"ERROR %u [%s] at %s:%u",
-				p_info->err_code,
+				(unsigned int)p_info->err_code,
 				nrf_strerror_get(p_info->err_code),
 				p_info->p_file_name,
 				(uint16_t)p_info->line_num);
@@ -162,7 +162,7 @@ extern "C" void app_error_fault_handler(uint32_t id, uint32_t pc, uint32_t info)
 	default:
 		NRF_LOG_ERROR("UNKNOWN FAULT at 0x%08X", pc);
 		snprintf(m_app_error.err_desc._buffer, sizeof(m_app_error.err_desc._buffer),
-				"UNKNOWN FAULT at 0x%08X", pc);
+				"UNKNOWN FAULT at 0x%08X", (unsigned int)pc);
 		break;
 	}
 

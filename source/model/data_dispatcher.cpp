@@ -11,11 +11,19 @@
 #include "math_wrapper.h"
 #include "segger_wrapper.h"
 
+#ifdef BLE_STACK_SUPPORT_REQD
+#include "ble_api_base.h"
+#endif
 
 static float m_angle = 0;
 static uint32_t m_cadence = 0;
 
 void data_dispatcher_feed_gyro(float mdeg_s) {
+
+	if (!isnormal(mdeg_s)) {
+		LOG_ERROR("Illegal float");
+		return;
+	}
 
 	m_cadence = (uint32_t)(fabsf(mdeg_s / 1000.) * 60. / 360.);
 
@@ -36,6 +44,9 @@ void data_dispatcher_feed_gyro(float mdeg_s) {
 
 	}
 
+#ifdef BLE_STACK_SUPPORT_REQD
+	ble_nus_log_cadence(m_cadence, 0);
+#endif
 }
 
 

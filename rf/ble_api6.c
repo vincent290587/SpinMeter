@@ -67,32 +67,25 @@
 #define TARGET_NAME                 "stravaAP"
 
 
-typedef enum {
-	eNusTransferStateIdle,
-	eNusTransferStateInit,
-	eNusTransferStateRun,
-	eNusTransferStateWait,
-	eNusTransferStateFinish
-} eNusTransferState;
-
-
 NRF_BLE_SCAN_DEF(m_scan);
 BLE_NUS_C_DEF(m_ble_nus_c);
 NRF_BLE_GATT_DEF(m_gatt);                                           /**< GATT module instance. */
-BLE_DB_DISCOVERY_DEF(m_db_disc);                                    /**< DB discovery module instance. */
-
-#define NUS_RB_SIZE      1024
-RING_BUFFER_DEF(nus_rb1, NUS_RB_SIZE);
+BLE_DB_DISCOVERY_DEF(m_db_disc);
 
 static bool                  m_retry_db_disc;              /**< Flag to keep track of whether the DB discovery should be retried. */
 static uint16_t              m_pending_db_disc_conn = BLE_CONN_HANDLE_INVALID;  /**< Connection handle for which the DB discovery is retried. */
 
+typedef struct {
+	uint8_t p_xfer_str[50];
+	uint16_t length;
+} sNusXfer;
+
+static sNusXfer m_nus_xfer;
+
 static volatile bool m_nus_cts = false;
+static volatile bool m_nus_rts = false;
 static volatile bool m_connected = false;
 static uint16_t m_nus_packet_nb = 0;
-
-static eNusTransferState m_nus_xfer_state = eNusTransferStateIdle;
-
 
 static void scan_start(void);
 
@@ -235,7 +228,6 @@ static void ble_evt_handler(ble_evt_t const * p_ble_evt, void * p_context)
 		break;
 	}
 
-
 	W_SYSVIEW_RecordExitISR();
 
 }
@@ -264,6 +256,7 @@ static void ble_stack_init(void)
 	// set name
 	ble_gap_conn_sec_mode_t sec_mode; // Struct to store security parameters
 	BLE_GAP_CONN_SEC_MODE_SET_OPEN(&sec_mode);
+
 	/*Get this device name*/
 	uint8_t device_name[20];
 	memset(device_name, 0, sizeof(device_name));
@@ -290,13 +283,11 @@ static void nus_c_evt_handler(ble_nus_c_t * p_ble_nus_c, ble_nus_c_evt_t const *
 		break;
 
 	case BLE_NUS_C_EVT_NUS_TX_EVT:
-		// TODO handle received chars
 		LOG_INFO("Received %u chars from BLE !", p_evt->data_len);
-
 		break;
 
 	case BLE_NUS_C_EVT_DISCONNECTED:
-		if (m_nus_xfer_state == eNusTransferStateRun) m_nus_xfer_state = eNusTransferStateFinish;
+		m_connected = false;
 		break;
 	}
 }
@@ -465,6 +456,7 @@ void ble_init(void)
 	ble_stack_init();
 
 	gatt_init();
+
 	db_discovery_init();
 
 	nus_c_init();
@@ -476,37 +468,27 @@ void ble_init(void)
 	scan_start();
 }
 
+void ble_nus_log_cadence(uint32_t cadence, uint32_t d_cad) {
+
+	if (!m_nus_rts) {
+		// create log
+		snprintf((char*)m_nus_xfer.p_xfer_str, sizeof(m_nus_xfer.p_xfer_str),
+				"Cadence: %u", (unsigned int)cadence);
+	}
+
+}
+
 /**
  * Send the log file to a remote computer
  */
 void ble_nus_tasks(void) {
 
-	if (m_nus_xfer_state == eNusTransferStateIdle) {
-
-		char c = RING_BUFF_GET_ELEM(nus_rb1);
-		RING_BUFFER_POP(nus_rb1);
-
-		model_input_virtual_uart(c);
-
-		return;
-	}
-
 	if (m_connected &&
-			m_nus_cts) {
+			m_nus_cts &&
+			m_nus_rts) {
 
-		char *p_xfer_str = NULL;
-		size_t length_ = 0;
-		// TODO
-		p_xfer_str = log_file_read(&length_);
-		if (!p_xfer_str || !length_) {
-			// problem or end of transfer
-			m_nus_xfer_state = eNusTransferStateFinish;
-			return;
-		} else {
-			// nothing
-		}
-
-		uint32_t err_code = ble_nus_c_string_send(&m_ble_nus_c, (uint8_t *)p_xfer_str, length_);
+		uint32_t err_code = ble_nus_c_string_send(&m_ble_nus_c,
+				m_nus_xfer.p_xfer_str, m_nus_xfer.length);
 
 		switch (err_code) {
 		case NRF_ERROR_BUSY:
@@ -514,7 +496,7 @@ void ble_nus_tasks(void) {
 			break;
 
 		case NRF_ERROR_RESOURCES:
-			NRF_LOG_INFO("NUS RESSSS %u", m_nus_packet_nb);
+			NRF_LOG_INFO("NUS RESS %u", m_nus_packet_nb);
 			m_nus_cts = false;
 			break;
 
@@ -523,8 +505,9 @@ void ble_nus_tasks(void) {
 			break;
 
 		case NRF_SUCCESS:
-			NRF_LOG_INFO("Packet %u sent size %u", m_nus_packet_nb, length_);
+			NRF_LOG_INFO("Packet %u sent size %u", m_nus_packet_nb, m_nus_xfer.length);
 			m_nus_packet_nb++;
+			m_nus_rts = false;
 			break;
 
 		default:
