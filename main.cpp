@@ -16,6 +16,7 @@
 #include "bsp.h"
 #include "i2c.h"
 #include "fram.h"
+#include "ble_api_base.h"
 #include "app_scheduler.h"
 #include "app_timer.h"
 #include "nrf_sdm.h"
@@ -336,6 +337,7 @@ static void pins_init(void)
 	nrf_gpio_cfg_output(LIS_INT2);
 
 	nrf_gpio_cfg_input(HV_EN, NRF_GPIO_PIN_PULLUP);
+//	nrf_gpio_pin_set(HV_EN);
 
 	nrf_gpio_cfg_output(N_VCCINT_EN);
 	nrf_gpio_pin_clear(N_VCCINT_EN);

@@ -42,6 +42,8 @@ INC_FOLDERS += \
   
 include $(PROJ_DIR)/Makefile.files
 
+include $(PROJ_DIR)/ble.files
+
 # Libraries common to all targets
 LIB_FILES += -lm -lstdc++
 
@@ -52,8 +54,8 @@ OPT = -O3 -g3
 
 # C flags common to all targets
 CFLAGS += $(OPT)
-CFLAGS += -DUSE_SVIEW=1 -DNRF_LOG_ENABLED=0 -DUSE_RTT=1
-#CFLAGS += -DUSE_SVIEW=0 -DNRF_LOG_ENABLED=1 -DUSE_RTT=1
+#CFLAGS += -DUSE_SVIEW=1 -DNRF_LOG_ENABLED=0 -DUSE_RTT=1
+CFLAGS += -DUSE_SVIEW=0 -DNRF_LOG_ENABLED=1 -DUSE_RTT=1
 #CFLAGS += -DUSE_SVIEW=0 -DUSE_JSCOPE -DNRF_LOG_ENABLED=0 -DUSE_RTT=1
 CFLAGS += -DDEBUG -DDEBUG_NRF -DDEBUG_NRF_USER
 CFLAGS += -DUSE_APP_CONFIG
@@ -63,7 +65,7 @@ CFLAGS += -DSOFTDEVICE_PRESENT
 CFLAGS += -DCONFIG_NFCT_PINS_AS_GPIOS
 CFLAGS += -DBOARD_CUSTOM
 CFLAGS += -D__HEAP_SIZE=16384
-#CFLAGS += -DBLE_STACK_SUPPORT_REQD
+CFLAGS += -DBLE_STACK_SUPPORT_REQD
 CFLAGS += -DANT_STACK_SUPPORT_REQD
 CFLAGS += -DNRF_SD_BLE_API_VERSION=6
 CFLAGS += -DSWI_DISABLE0
@@ -72,7 +74,7 @@ CFLAGS += -DS332
 CFLAGS += -mcpu=cortex-m4 -DARM_MATH_CM4
 CFLAGS += -mthumb -mabi=aapcs
 CFLAGS += -Wall $(OPT)
-CFLAGS += -DFLOAT_ABI_HARD
+CFLAGS += -DFLOAT_ABI_HARD -DFPU_INTERRUPT_MODE
 CFLAGS += -mfloat-abi=hard
 # keep every function in separate section, this allows linker to discard unused ones
 CFLAGS += -ffunction-sections -fdata-sections -fno-strict-aliasing
