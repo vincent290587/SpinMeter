@@ -52,6 +52,7 @@ void data_dispatcher_feed_gyro(float mdeg_s) {
 	_check_is_moving(mdeg_s);
 
 	m_cadence = (uint32_t)(fabsf(mdeg_s / 1000.) * 60. / 360.);
+	LOG_INFO("Cadence: %u", m_cadence);
 
 	// integrate angular speed over time (25Hz)
 	float val = fabsf(mdeg_s / 1000.) / 25.;

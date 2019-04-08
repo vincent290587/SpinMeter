@@ -49,7 +49,7 @@ void idle_task(void * p_context)
 {
     for(;;)
     {
-    	sleep(40);
+    	sleep(5);
 
 		simulator_tasks();
 
@@ -79,9 +79,6 @@ void peripherals_task(void * p_context)
 {
 	for(;;)
 	{
-
-    	sleep(5);
-
     	task_yield();
 	}
 }

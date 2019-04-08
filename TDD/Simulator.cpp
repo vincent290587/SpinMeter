@@ -12,6 +12,7 @@
 #include "Model_tdd.h"
 #include "Simulator.h"
 #include "segger_wrapper.h"
+#include "math_wrapper.h"
 #include "assert_wrapper.h"
 
 /*******************************************************************************
@@ -44,6 +45,25 @@ void simulator_tasks(void) {
 		return;
 	}
 
-	data_dispatcher_feed_gyro(0.0F);
+	if (millis() > 90000) {
+		data_dispatcher_feed_gyro(500.0F);
+		return;
+	}
 
+	float sampling_hz = 25;
+	float omega = 2 * M_PI; // rad/s
+
+	float val;
+	static int i = 0;
+
+	val = omega * 1000 * 180 / M_PI;
+	val += 3000 * sinf(omega * i / sampling_hz);
+	i++;
+
+	data_dispatcher_feed_gyro(val);
+
+	// make sure we don't run for eternity...
+	if (millis() > 5 * 60000) {
+		exit(-1);
+	}
 }
