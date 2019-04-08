@@ -77,7 +77,7 @@ static uint16_t              m_pending_db_disc_conn = BLE_CONN_HANDLE_INVALID;  
 
 typedef struct {
 	uint8_t p_xfer_str[50];
-	uint16_t length;
+	int16_t length;
 } sNusXfer;
 
 static sNusXfer m_nus_xfer;
@@ -121,6 +121,10 @@ static void ble_evt_handler(ble_evt_t const * p_ble_evt, void * p_context)
 	{
 		LOG_INFO("Connected.");
 		m_connected = true;
+
+		// clear to send more packets
+		m_nus_cts = true;
+
 		m_pending_db_disc_conn = p_ble_evt->evt.gap_evt.conn_handle;
 		m_retry_db_disc = false;
 		// Discover peer's services.
@@ -148,6 +152,7 @@ static void ble_evt_handler(ble_evt_t const * p_ble_evt, void * p_context)
 				p_ble_evt->evt.gap_evt.params.disconnected.reason);
 
 		m_connected = false;
+		m_nus_cts = false;
 
 		// Reset DB discovery structure.
 		memset(&m_db_disc, 0 , sizeof (m_db_disc));
@@ -470,11 +475,19 @@ void ble_init(void)
 
 void ble_nus_log_cadence(uint32_t cadence, uint32_t d_cad) {
 
-	if (!m_nus_rts) {
-		// create log
-		snprintf((char*)m_nus_xfer.p_xfer_str, sizeof(m_nus_xfer.p_xfer_str),
-				"Cadence: %u", (unsigned int)cadence);
-	}
+	// create log
+	m_nus_xfer.length = snprintf((char*)m_nus_xfer.p_xfer_str, sizeof(m_nus_xfer.p_xfer_str),
+			"Cadence: %u \r\n", (unsigned int)cadence);
+
+	m_nus_rts = true;
+}
+
+void ble_nus_log_text(const char * text) {
+
+	// create log
+	if (!text) return;
+	m_nus_xfer.length = snprintf((char*)m_nus_xfer.p_xfer_str, sizeof(m_nus_xfer.p_xfer_str),
+			text);
 
 	m_nus_rts = true;
 }
@@ -487,6 +500,8 @@ void ble_nus_tasks(void) {
 	if (m_connected &&
 			m_nus_cts &&
 			m_nus_rts) {
+
+		if (m_nus_xfer.length < 0) return;
 
 		uint32_t err_code = ble_nus_c_string_send(&m_ble_nus_c,
 				m_nus_xfer.p_xfer_str, m_nus_xfer.length);

@@ -7,6 +7,7 @@
 
 
 #include "gpio.h"
+#include "millis.h"
 #include "Model.h"
 #include "data_dispatcher.h"
 #include "math_wrapper.h"
@@ -25,7 +26,14 @@ static void _check_is_moving(float mdeg_s) {
 
 	if (fabsf(mdeg_s) < 500 &&
 			m_static_nb++ > 2 * 60 * 25) {
-		LOG_WARNING("Inactivity timeout: going to shutdown");
+		LOG_ERROR("Inactivity timeout: going to shutdown");
+
+#ifdef BLE_STACK_SUPPORT_REQD
+		ble_nus_log_text("Inactivity timeout: going to shutdown");
+		ble_nus_tasks();
+		delay_ms(10);
+#endif
+
 		app_shutdown();
 		m_static_nb = 0;
 	} else {

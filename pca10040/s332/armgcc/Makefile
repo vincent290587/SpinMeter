@@ -72,10 +72,11 @@ CFLAGS += -DSWI_DISABLE0
 CFLAGS += -DNRF52_PAN_74
 CFLAGS += -DS332
 CFLAGS += -mcpu=cortex-m4 -DARM_MATH_CM4
-CFLAGS += -mthumb -mabi=aapcs
 CFLAGS += -Wall $(OPT)
-CFLAGS += -DFLOAT_ABI_HARD -DFPU_INTERRUPT_MODE
-CFLAGS += -mfloat-abi=hard
+CFLAGS += -DFPU_INTERRUPT_MODE
+CFLAGS += -DFLOAT_ABI_HARD
+CFLAGS += -mthumb -mabi=aapcs
+CFLAGS += -mfloat-abi=hard -mfpu=fpv4-sp-d16
 # keep every function in separate section, this allows linker to discard unused ones
 CFLAGS += -ffunction-sections -fdata-sections -fno-strict-aliasing
 CFLAGS += -fno-builtin -fshort-enums -nostdlib -fno-exceptions

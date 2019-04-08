@@ -30,7 +30,7 @@ static void _int1_handler(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action
 	// trigger a measurement in the lis2dw & bmg250
 	lis2dw12_meas_trigger();
 
-	fdc1004_meas_trigger();
+//	fdc1004_meas_trigger();
 
 	W_SYSVIEW_RecordExitISR();
 }
@@ -62,7 +62,7 @@ static void _i2c_scheduling_sensors_init() {
 
 	// Init sensors configuration
 
-	fdc1004_wrapper_init();
+//	fdc1004_wrapper_init();
 
 	lis2dw12_wrapper_init();
 

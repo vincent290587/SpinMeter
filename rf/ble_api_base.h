@@ -21,6 +21,8 @@ void ble_nus_tasks(void);
 
 void ble_nus_log_cadence(uint32_t cadence, uint32_t d_cad);
 
+void ble_nus_log_text(const char * text);
+
 
 #ifdef __cplusplus
 }

@@ -31,6 +31,7 @@
 #include "i2c_scheduler.h"
 #include "Model.h"
 #include "segger_wrapper.h"
+#include "lis2dw12_wrapper.h"
 #include "WString.h"
 
 #ifdef SOFTDEVICE_PRESENT
@@ -250,6 +251,8 @@ static bool app_shutdown_handler(nrf_pwr_mgmt_evt_t event)
 		nrf_gpio_pin_clear(HV_EN);
 		nrf_gpio_pin_set(N_VCCINT_EN);
 
+		lis2dw12_wrapper_set_wake();
+
 #if defined (ANT_STACK_SUPPORT_REQD)
 	    ant_setup_stop();
 #endif
@@ -425,12 +428,8 @@ int main(void)
 	buttons_leds_init();
 	nrf_gpio_pin_set(LED_1);
 
-	nrf_delay_ms(2);
-
 	// drivers
 	i2c_init();
-
-	nrf_delay_ms(7);
 
 	// init BLE + ANT
 #ifdef SOFTDEVICE_PRESENT
@@ -462,6 +461,10 @@ int main(void)
 		app_sched_execute();
 #endif
 
+#if defined (BLE_STACK_SUPPORT_REQD)
+		ble_nus_tasks();
+#endif
+
 		i2c_scheduling_tasks();
 
 		LOG_DEBUG("App run");
@@ -473,7 +476,7 @@ int main(void)
     	//No more logs to process, go to sleep
 		sysview_task_idle();
 
-		nrf_pwr_mgmt_run();
+		pwr_mgmt_run();
 	}
 
 }

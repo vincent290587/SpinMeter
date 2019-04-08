@@ -199,6 +199,6 @@ void bmg250_wrapper_sensor_refresh(void) {
 	float val = (float)m_gyro_data.z * 61.0f;
 	data_dispatcher_feed_gyro(val);
 
-	LOG_INFO("BMG250 angular speed: %d deg/s", (int32_t)val);
+	LOG_INFO("BMG250 angular speed: %d deg/s", (int32_t)(val / 1000));
 
 }

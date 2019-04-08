@@ -45,18 +45,18 @@ void fdc1004_wrapper_init(void)
 		sChannelMeasurement ch_meas;
 		ch_meas.val = 0;
 
-//		ch_meas.bitfield.p_channel = eCHACIN1;
-//		ch_meas.bitfield.n_channel = eCHBCIN2;
-//		FDC1004_configure_differential_measurement(0, &ch_meas);
+		ch_meas.bitfield.p_channel = eCHACIN1;
+		ch_meas.bitfield.n_channel = eCHBCIN2;
+		FDC1004_configure_differential_measurement(0, &ch_meas);
 
 //		ch_meas.bitfield.p_channel = eCHACIN1;
-//		ch_meas.bitfield.n_channel = eCHBCDAC;
-//		ch_meas.bitfield.capdac = 0b11111;
+//		ch_meas.bitfield.n_channel = eCHBDis;
+//		ch_meas.bitfield.capdac = 0b1111;
 //		FDC1004_configure_single_measurement(0, &ch_meas);
 
-		ch_meas.bitfield.p_channel = eCHACIN2;
-		ch_meas.bitfield.n_channel = eCHBDis;
-		FDC1004_configure_single_measurement(0, &ch_meas);
+//		ch_meas.bitfield.p_channel = eCHACIN1;
+//		ch_meas.bitfield.n_channel = eCHBDis;
+//		FDC1004_configure_single_measurement(0, &ch_meas);
 
 		// set trigger
 		sChannelTrigger trigger;
