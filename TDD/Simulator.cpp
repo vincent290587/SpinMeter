@@ -44,6 +44,6 @@ void simulator_tasks(void) {
 		return;
 	}
 
-	data_dispatcher_feed_gyro(360000.);
+	data_dispatcher_feed_gyro(0.0F);
 
 }

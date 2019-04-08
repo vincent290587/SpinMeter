@@ -119,6 +119,11 @@ void task4(void *p_context) {
 	}
 }
 
+void app_shutdown(void) {
+	LOG_INFO("App shutdown now");
+	exit(0);
+}
+
 /**
  *
  * @return 0

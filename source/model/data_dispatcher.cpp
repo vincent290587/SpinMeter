@@ -24,7 +24,7 @@ static uint32_t m_static_nb = 0;
 
 static void _check_is_moving(float mdeg_s) {
 
-	if (fabsf(mdeg_s) < 500 &&
+	if (m_cadence < 5 &&
 			m_static_nb++ > 2 * 60 * 25) {
 		LOG_ERROR("Inactivity timeout: going to shutdown");
 
@@ -34,9 +34,9 @@ static void _check_is_moving(float mdeg_s) {
 		delay_ms(10);
 #endif
 
-		app_shutdown();
 		m_static_nb = 0;
-	} else {
+		app_shutdown();
+	} else if (m_cadence) {
 		m_static_nb = 0;
 	}
 
@@ -44,7 +44,7 @@ static void _check_is_moving(float mdeg_s) {
 
 void data_dispatcher_feed_gyro(float mdeg_s) {
 
-	if (!isnormal(mdeg_s)) {
+	if (isnan(mdeg_s)) {
 		LOG_ERROR("Illegal float");
 		return;
 	}

@@ -40,4 +40,7 @@
 #include "task_manager_wrapper_tdd.h"
 
 
+void app_shutdown(void);
+
+
 #endif /* SEGGER_WRAPPER_TDD_H_ */
