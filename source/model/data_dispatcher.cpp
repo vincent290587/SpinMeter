@@ -8,6 +8,7 @@
 
 #include "gpio.h"
 #include "millis.h"
+#include "sine_fitter.h"
 #include "Model.h"
 #include "data_dispatcher.h"
 #include "math_wrapper.h"
@@ -17,10 +18,17 @@
 #include "ble_api_base.h"
 #endif
 
+typedef struct {
+	float m_angle[50];
+	uint16_t nb_val;
+} sCadenceBuffer;
+
 static float m_angle = 0;
 static uint32_t m_cadence = 0;
 
 static uint32_t m_static_nb = 0;
+
+static sCadenceBuffer m_cad_buffer;
 
 static void _check_is_moving(float mdeg_s) {
 
@@ -42,6 +50,38 @@ static void _check_is_moving(float mdeg_s) {
 
 }
 
+static void _cadence_compute(float mdeg_s) {
+
+	if (m_cad_buffer.nb_val == sizeof(m_cad_buffer.m_angle) / sizeof(m_cad_buffer.m_angle[0])) {
+
+		float omega = 0.0F;
+		// determine max and min of angular speed
+		{
+			float min = m_cad_buffer.m_angle[0];
+			float max = m_cad_buffer.m_angle[0];
+
+			for (unsigned i=1; i< sizeof(m_cad_buffer.m_angle) / sizeof(m_cad_buffer.m_angle[0]); i++) {
+
+				min = MIN(min, m_cad_buffer.m_angle[i]);
+				max = MAX(max, m_cad_buffer.m_angle[i]);
+
+			}
+
+			omega = 0.5 * (min + max);
+		}
+
+		m_cadence = (uint32_t)(fabsf(omega / 1000.) * 60. / 360. + 0.5);
+
+		LOG_INFO("Cadence: %f %u", omega, m_cadence);
+
+		m_cad_buffer.nb_val = 0;
+	} else {
+		// fill buffer
+		m_cad_buffer.m_angle[m_cad_buffer.nb_val++] = mdeg_s;
+	}
+
+}
+
 void data_dispatcher_feed_gyro(float mdeg_s) {
 
 	if (isnan(mdeg_s)) {
@@ -51,8 +91,7 @@ void data_dispatcher_feed_gyro(float mdeg_s) {
 
 	_check_is_moving(mdeg_s);
 
-	m_cadence = (uint32_t)(fabsf(mdeg_s / 1000.) * 60. / 360.);
-	LOG_INFO("Cadence: %u", m_cadence);
+	_cadence_compute(mdeg_s);
 
 	// integrate angular speed over time (25Hz)
 	float val = fabsf(mdeg_s / 1000.) / 25.;

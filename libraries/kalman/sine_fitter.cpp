@@ -7,6 +7,7 @@
 
 #include "sine_fitter.h"
 #include "math_wrapper.h"
+#include "segger_wrapper.h"
 
 static float _fitter_compute(float *datax, float *datay, float *dataz,
 		uint16_t numOfData, float *res) {
@@ -173,5 +174,7 @@ void sine_fitter_compute(float *dataz, float omega, float sampling,
 		output->beta  = my_sqrtf(res[1]*res[1]+res[0]*res[0]);
 		output->phi   = atan2f(res[0], res[1]);
 
+	} else {
+		LOG_ERROR("NULL determinant");
 	}
 }
