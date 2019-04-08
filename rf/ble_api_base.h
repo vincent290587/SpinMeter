@@ -17,6 +17,8 @@ extern "C" {
 
 void ble_init(void);
 
+void ble_uninit(void);
+
 void ble_nus_tasks(void);
 
 void ble_nus_log_cadence(uint32_t cadence, uint32_t d_cad);

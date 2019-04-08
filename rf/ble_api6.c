@@ -400,6 +400,13 @@ static void scan_start(void)
 	APP_ERROR_CHECK(ret);
 }
 
+/**@brief Function to start scanning.
+ */
+static void scan_stop(void)
+{
+	nrf_ble_scan_stop();
+}
+
 /**@brief GATT module event handler.
  */
 static void gatt_evt_handler(nrf_ble_gatt_t * p_gatt, nrf_ble_gatt_evt_t const * p_evt)
@@ -471,6 +478,12 @@ void ble_init(void)
 	// Start scanning for peripherals and initiate connection
 	// with devices
 	scan_start();
+}
+
+void ble_uninit(void) {
+
+	scan_stop();
+
 }
 
 void ble_nus_log_cadence(uint32_t cadence, uint32_t d_cad) {

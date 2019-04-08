@@ -37,6 +37,8 @@ extern "C" {
 
 void i2c_init(void);
 
+void i2c_uninit(void);
+
 void i2c_scan(void);
 
 void i2c_schedule(nrf_twi_mngr_transaction_t const * p_transaction);

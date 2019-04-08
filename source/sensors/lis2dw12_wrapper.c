@@ -80,7 +80,7 @@ static void _lis2dw12_readout_cb(ret_code_t result, void * p_user_data) {
 
 	m_is_updated = true;
 
-	LOG_WARNING("LIS2DW read");
+	LOG_DEBUG("LIS2DW read");
 
 	W_SYSVIEW_RecordExitISR();
 
@@ -118,6 +118,16 @@ static void _int1_handler(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action
 
 	// schedule sensor reading
 	_lis2dw12_read_sensor();
+
+	W_SYSVIEW_RecordEnterISR();
+}
+
+static void _int1_handler_wu(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action)
+{
+	W_SYSVIEW_RecordEnterISR();
+
+	// clear trigger
+	gpio_toggle(LED_1);
 
 	W_SYSVIEW_RecordEnterISR();
 }
@@ -213,6 +223,9 @@ void lis2dw12_wrapper_set_wake(void)
 	dev_ctx.read_reg = _lis_i2c_read;
 	dev_ctx.handle = NULL;
 
+	// clear trigger
+	gpio_clear(LIS_INT2);
+
 	/*
 	 * Check device ID
 	 */
@@ -231,12 +244,12 @@ void lis2dw12_wrapper_set_wake(void)
 	/*
 	 * Set full scale
 	 */
-	lis2dw12_full_scale_set(&dev_ctx, LIS2DW12_2g);
+	lis2dw12_full_scale_set(&dev_ctx, LIS2DW12_8g);
 
 	/*
 	 * Configure power mode
 	 */
-	lis2dw12_power_mode_set(&dev_ctx, LIS2DW12_CONT_LOW_PWR_LOW_NOISE_12bit);
+	lis2dw12_power_mode_set(&dev_ctx, LIS2DW12_CONT_LOW_PWR_LOW_NOISE_4);
 
 	/*
 	 * Set Output Data Rate
@@ -244,24 +257,31 @@ void lis2dw12_wrapper_set_wake(void)
 	lis2dw12_data_rate_set(&dev_ctx, LIS2DW12_XL_ODR_1Hz6_LP_ONLY);
 
 	/*
-	 * Apply high-pass digital filter on Wake-Up function
-	 */
-	lis2dw12_filter_path_set(&dev_ctx, LIS2DW12_HIGH_PASS_ON_OUT);
-
-	/*
-	 * Apply high-pass digital filter on Wake-Up function
-	 * Duration time is set to zero so Wake-Up interrupt signal
-	 * is generated for each X,Y,Z filtered data exceeding the
-	 * configured threshold
-	 */
-	lis2dw12_wkup_dur_set(&dev_ctx, 0);
+//	 * Apply high-pass digital filter on Wake-Up function
+//	 */
+//	lis2dw12_filter_path_set(&dev_ctx, LIS2DW12_HIGH_PASS_ON_OUT);
+//
+//	/*
+//	 * Apply high-pass digital filter on Wake-Up function
+//	 * Duration time is set to zero so Wake-Up interrupt signal
+//	 * is generated for each X,Y,Z filtered data exceeding the
+//	 * configured threshold
+//	 */
+//	lis2dw12_wkup_dur_set(&dev_ctx, 10);
 
 	/*
 	 * Set wake-up threshold
 	 *
 	 * Set Wake-Up threshold: 1 LSb corresponds to FS_XL/2^6
 	 */
-	lis2dw12_wkup_threshold_set(&dev_ctx, 2);
+	lis2dw12_wkup_threshold_set(&dev_ctx, 5);
+
+	// uninit old interrupt
+	nrfx_gpiote_in_uninit(LIS_INT1);
+
+	// set pulsed interrupts
+	lis2dw12_lir_t val = LIS2DW12_INT_PULSED;
+	lis2dw12_int_notification_set(&dev_ctx, val);
 
 	/*
 	 * Enable interrupt generation on Wake-Up INT1 pin
@@ -271,6 +291,25 @@ void lis2dw12_wrapper_set_wake(void)
 	int_route.ctrl4_int1_pad_ctrl.int1_wu = PROPERTY_ENABLE;
 	lis2dw12_pin_int1_route_set(&dev_ctx, &int_route.ctrl4_int1_pad_ctrl);
 
+	// configure new interrupt
+	nrfx_gpiote_in_config_t in_config;
+	in_config.is_watcher = true;
+	in_config.hi_accuracy = true;
+	in_config.skip_gpio_setup = false;
+	in_config.pull = NRF_GPIO_PIN_PULLDOWN;
+	in_config.sense = NRF_GPIOTE_POLARITY_LOTOHI;
+
+	ret_code_t err_code = nrfx_gpiote_in_init(LIS_INT1, &in_config, _int1_handler_wu);
+	APP_ERROR_CHECK(err_code);
+
+	nrfx_gpiote_in_event_enable(LIS_INT1, true);
+
+	nrf_gpio_cfg_sense_input(LIS_INT1, NRF_GPIO_PIN_PULLDOWN, NRF_GPIO_PIN_SENSE_HIGH);
+
+	// schedule sensor reading
+	_lis2dw12_read_sensor();
+
+	LOG_WARNING("LIS2DW12 configured for wakeup !");
 }
 
 bool lis2dw12_wrapper_is_updated(void) {

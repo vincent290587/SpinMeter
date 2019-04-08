@@ -254,22 +254,28 @@ static bool app_shutdown_handler(nrf_pwr_mgmt_evt_t event)
 	// no break
 	case NRF_PWR_MGMT_EVT_PREPARE_SYSOFF:
 	{
+		LOG_WARNING("Preparing SYSOFF");
+
+		i2c_scheduling_uninit();
+
 		nrf_gpio_pin_clear(HV_EN);
 		nrf_gpio_pin_set(N_VCCINT_EN);
 
 #if defined (ANT_STACK_SUPPORT_REQD)
 	    ant_setup_stop();
 #endif
-#ifdef SOFTDEVICE_PRESENT
-	    //Disable SoftDevice. It is required to be able to write to GPREGRET2 register (SoftDevice API blocks it).
-	    //GPREGRET2 register holds the information about skipping CRC check on next boot.
-	    err_code = nrf_sdh_disable_request();
-	    APP_ERROR_CHECK(err_code);
+
+#if defined (BLE_STACK_SUPPORT_REQD)
+	    ble_uninit();
 #endif
 
 		// Device ready to enter
 		err_code = app_timer_stop_all();
 		APP_ERROR_CHECK(err_code);
+
+#ifdef SOFTDEVICE_PRESENT
+		nrf_sdh_disable_request();
+#endif
 
 	} break;
 	case NRF_PWR_MGMT_EVT_PREPARE_DFU:
@@ -280,17 +286,11 @@ static bool app_shutdown_handler(nrf_pwr_mgmt_evt_t event)
 #if defined (ANT_STACK_SUPPORT_REQD)
 	    ant_setup_stop();
 #endif
-#ifdef SOFTDEVICE_PRESENT
-	    //Disable SoftDevice. It is required to be able to write to GPREGRET2 register (SoftDevice API blocks it).
-	    //GPREGRET2 register holds the information about skipping CRC check on next boot.
-	    err_code = nrf_sdh_disable_request();
-	    APP_ERROR_CHECK(err_code);
-#endif
 
 		err_code = app_timer_stop_all();
 		APP_ERROR_CHECK(err_code);
 
-		LOG_INFO("Power management allowed to reset to DFU mode.");
+		LOG_WARNING("Power management allowed to reset to DFU mode.");
 
 	} break;
 	default:
@@ -351,7 +351,7 @@ void wdt_reload(void) {
 }
 
 void app_shutdown(void) {
-	nrf_pwr_mgmt_shutdown(NRF_PWR_MGMT_SHUTDOWN_STAY_IN_SYSOFF);
+	nrf_pwr_mgmt_shutdown(NRF_PWR_MGMT_SHUTDOWN_GOTO_SYSOFF);
 }
 
 
@@ -475,7 +475,7 @@ int main(void)
     	//No more logs to process, go to sleep
 		sysview_task_idle();
 
-		pwr_mgmt_run();
+		nrf_pwr_mgmt_run();
 	}
 
 }

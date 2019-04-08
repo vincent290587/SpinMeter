@@ -33,7 +33,7 @@ static sCadenceBuffer m_cad_buffer;
 static void _check_is_moving(float mdeg_s) {
 
 	if (m_cadence < 5 &&
-			m_static_nb++ > 2 * 60 * 25) {
+			m_static_nb++ > 20 * 25) {
 		LOG_ERROR("Inactivity timeout: going to shutdown");
 
 #ifdef BLE_STACK_SUPPORT_REQD
@@ -97,10 +97,14 @@ void data_dispatcher_feed_gyro(float mdeg_s) {
 	float val = fabsf(mdeg_s / 1000.) / 25.;
 	m_angle += val;
 
+	static uint32_t nb_turns = 0;
+
 	if (m_angle > 360.) {
 		m_angle = 0.0;
 
 		LOG_WARNING("Full turn !");
+
+		nb_turns++;
 
 		gpio_set(LED_1);
 
@@ -114,7 +118,7 @@ void data_dispatcher_feed_gyro(float mdeg_s) {
 	// log cadence through BLE every second
 	static int nb_ind = 25;
 	if (nb_ind-- == 0) {
-		ble_nus_log_cadence(m_cadence, 0);
+		ble_nus_log_cadence(m_cadence, nb_turns);
 		nb_ind = 25;
 	}
 #endif

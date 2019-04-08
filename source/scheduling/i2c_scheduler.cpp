@@ -8,6 +8,7 @@
 #include "boards.h"
 #include "helper.h"
 #include "i2c.h"
+#include "gpio.h"
 #include "i2c_scheduler.h"
 #include "segger_wrapper.h"
 #include "parameters.h"
@@ -23,6 +24,9 @@ static void _int1_handler(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action
 {
 
 	W_SYSVIEW_RecordEnterISR();
+
+	// clear trigger
+	gpio_toggle(LED_1);
 
     // schedule sensor reading
 	bmg250_wrapper_schedule_sensor();
@@ -80,6 +84,17 @@ void i2c_scheduling_init(void) {
 
 	// post-init steps
 	_i2c_scheduling_sensors_post_init();
+
+}
+
+/**
+ *
+ */
+void i2c_scheduling_uninit(void) {
+
+	i2c_uninit();
+
+	nrfx_gpiote_in_uninit(GYR_INT1);
 
 }
 
