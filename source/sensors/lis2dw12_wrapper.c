@@ -111,11 +111,15 @@ static void _lis2dw12_read_sensor(void) {
 
 static void _int1_handler(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action)
 {
+	W_SYSVIEW_RecordEnterISR();
+
 	// clear trigger
 	gpio_clear(LIS_INT2);
 
 	// schedule sensor reading
 	_lis2dw12_read_sensor();
+
+	W_SYSVIEW_RecordEnterISR();
 }
 
 void lis2dw12_meas_trigger(void) {

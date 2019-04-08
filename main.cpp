@@ -246,12 +246,16 @@ static bool app_shutdown_handler(nrf_pwr_mgmt_evt_t event)
 {
 	ret_code_t err_code;
 
-	if (NRF_PWR_MGMT_EVT_PREPARE_SYSOFF == event) {
-
+	switch (event) {
+	case NRF_PWR_MGMT_EVT_PREPARE_WAKEUP:
+	{
+		lis2dw12_wrapper_set_wake();
+	}
+	// no break
+	case NRF_PWR_MGMT_EVT_PREPARE_SYSOFF:
+	{
 		nrf_gpio_pin_clear(HV_EN);
 		nrf_gpio_pin_set(N_VCCINT_EN);
-
-		lis2dw12_wrapper_set_wake();
 
 #if defined (ANT_STACK_SUPPORT_REQD)
 	    ant_setup_stop();
@@ -267,9 +271,9 @@ static bool app_shutdown_handler(nrf_pwr_mgmt_evt_t event)
 		err_code = app_timer_stop_all();
 		APP_ERROR_CHECK(err_code);
 
-		return true;
-	} else if (NRF_PWR_MGMT_EVT_PREPARE_DFU == event) {
-
+	} break;
+	case NRF_PWR_MGMT_EVT_PREPARE_DFU:
+	{
 		nrf_gpio_pin_clear(HV_EN);
 		nrf_gpio_pin_set(N_VCCINT_EN);
 
@@ -286,16 +290,11 @@ static bool app_shutdown_handler(nrf_pwr_mgmt_evt_t event)
 		err_code = app_timer_stop_all();
 		APP_ERROR_CHECK(err_code);
 
-		// add GPREGRET flag
-		err_code = sd_power_gpregret_clr(0, 0xffffffff);
-	    VERIFY_SUCCESS(err_code);
-
-	    err_code = sd_power_gpregret_set(0, BOOTLOADER_DFU_START);
-	    VERIFY_SUCCESS(err_code);
-
 		LOG_INFO("Power management allowed to reset to DFU mode.");
 
-		return true;
+	} break;
+	default:
+		break;
 	}
 
 	return true;
